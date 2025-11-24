@@ -6,8 +6,23 @@ output:
 always_allow_html: true
 ---
 
-```{r setup}
-knitr::opts_chunk$set(echo = TRUE,warning = FALSE, message = FALSE)
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE, message = FALSE)
+
+#---
+#title: "README"
+#output: 
+#  github_document:
+#    pandoc_args: ["--wrap=none"]
+#always_allow_html: true
+#---
+
+#---
+#title: "Data Analysis Hexad-12 Spanish"
+#output: html_document
+#date: "2025-11-28"
+#---
+
 
 ```
 
@@ -17,8 +32,9 @@ knitr::opts_chunk$set(echo = TRUE,warning = FALSE, message = FALSE)
 libraries <- c(
   "knitr", "dplyr", "ggplot2", "tidyr", "multcomp", 
   "kableExtra", "FSA", "MVN", "lavaan", "semPlot", 
-  "psych", "boot", "markdown","moments","tidyverse","gghalves"
+  "psych", "boot", "markdown","moments","tidyverse","gghalves", "multimode"
 )
+
 
 # Function to check, install, and load libraries
 check_and_load <- function(lib) {
@@ -30,15 +46,13 @@ check_and_load <- function(lib) {
 
 # Apply the function to all libraries
 lapply(libraries, check_and_load)
-
 set.seed(123)  # For reproducibility
-
+num_bootstrap <- 10000 # Number of bootstrap samples
 
 ```
 
 
 Download that from GitHub Repo: https://github.com/
-
 ```{r}
 # Define the GitHub raw CSV URL
 #github_url <- "https://raw.githubusercontent.com//Hexad-/refs/heads/main/Hexad_12_Spanish_data.csv"
@@ -52,22 +66,21 @@ Download that from GitHub Repo: https://github.com/
 # Load the CSV into a data frame
 #data <- read.csv(local_file,row.names = 1)
 data<-read.csv("Hexad_12_Spanish_data.csv")
-#remove 1st non-value columns
-
 
 # Display the first few rows of the data frame
 head(data)
 ```
-## General Statistics
+# 4. Results 
 
+## 4.2. Sample descriptives
 
-#### Number of Participants
+### Number of Participants
 Each row represents a data point from a single participant. Total number of participants
 ```{r}
 print(nrow(data))
 ```
 
-#### Completion Time
+### Completion Time Summary statistics 
 ```{r}
 # Ensure Completion.Time is numeric
 data$Completion.Time <- as.numeric(data$Completion.Time)
@@ -90,9 +103,8 @@ kable(summary_table, caption = "Summary Statistics for Completion Time")
 ```
 
 
-#### Age
+### Age Summary statistics 
 ```{r}
-# Ensure Completion.Time is numeric
 data$Age <- as.numeric(data$Age)
 
 # Compute and create summary table
@@ -113,7 +125,7 @@ kable(summary_table, caption = "Summary Statistics for Age")
 ```
 
 
-#### Gender
+### Gender Summary statistics 
 ```{r}
 # Encode Gender as a factor with specific levels
 gender_labels <- c("female", "male", "other")
@@ -137,7 +149,7 @@ kable(gender_summary_table, caption = "Summary of Gender Distribution with Total
 ```
 
 
-#### Education Level
+### Education Level Summary statistics 
 ```{r}
 # Encode Education Level as a factor with specific levels
 educationlevel_labels <- c(
@@ -169,9 +181,8 @@ kable(education_summary_table, caption = "Summary of Education Level Distributio
 ```
 
 
-#### Playing Days
+### Game frequency Summary statistics 
 ```{r}
-# Ensure Completion.Time is numeric
 data$Freq.Games <- as.numeric(data$Freq.Games)
 
 # Compute and create summary table
@@ -191,8 +202,7 @@ summary_table <- data.frame(
 kable(summary_table, caption = "Summary Statistics for Frequency of Play")
 ```
 
-#### Country of Origin
-
+### Country of Origin Summary statistics 
 ```{r}
 # Filter the data to exclude empty Country values
 filtered_data <- data$Country[data$Country != ""]
@@ -210,20 +220,20 @@ summary_table <- data.frame(
 )
 
 # Display the summary table
-kable(summary_table, caption = "Summary of Country Distribution with Totals at the Top")
+kable(head(summary_table,11), caption = "Summary of Country Distribution with Totals at the Top")
 
 ```
 
 
 
-#### Hexad type  Distribution
+### Hexad determinants Summary statistics 
 
-
+#### Table 3. Summary Statistics of Hexad-12 determinants (N = 866)
 ```{r}
 
 
 # Subset data to include the first six columns
-subdata <- data[, c(1:6)]
+subdata <- data[, c(2:7)]
 
 # Specify the columns of interest
 columns_of_interest <- c("Philanthropist", "Socializer", "Free Spirit", "Achiever", "Player", "Disruptor")
@@ -240,7 +250,7 @@ summary_stats <- data.frame(
   Max      = round(sapply(subdata[columns_of_interest], max,       na.rm = TRUE), 2),
   SD       = round(sapply(subdata[columns_of_interest], sd,        na.rm = TRUE), 2),
   Skewness = round(sapply(subdata[columns_of_interest], skewness,  na.rm = TRUE), 2),
-  Kurtosis = round(sapply(subdata[columns_of_interest], kurtosis,  na.rm = TRUE), 2)
+  Kurtosis = round(sapply(subdata[columns_of_interest], moments::kurtosis,  na.rm = TRUE), 2)
 )
 
 # Sort by descending Mean
@@ -255,7 +265,7 @@ kable(summary_stats,
 ```
 
 
-
+#### Figure 2: Violin plot of Hexad determinant distributions
 ```{r}
 
 library(tidyverse)
@@ -281,7 +291,7 @@ hexad_long <- data %>%
   )
 
 # ---- full violin + slim boxplot + jittered points --------------------------
-ggplot(hexad_long, aes(x = Determinant, y = Score, fill = Determinant)) +
+g<-ggplot(hexad_long, aes(x = Determinant, y = Score, fill = Determinant)) +
   # wider violin
   geom_violin(trim = FALSE, width = 1.0, alpha = 0.6) +
   # ultra-thin box in the center
@@ -301,14 +311,63 @@ ggplot(hexad_long, aes(x = Determinant, y = Score, fill = Determinant)) +
   theme_minimal(base_size = 12) +
   theme(panel.grid.major.x = element_blank())
 
+print(g)
+```
+
+### Summary statistics for all Hexad-12 determinants across key subgroups
+
+#### Appendix A3. Distribution of Hexad determinants by Education
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Hexad determinants
+hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+# 1) Summaries by Education (with N)
+hexad_by_edu <- data %>%
+  filter(!is.na(Education)) %>%        
+  group_by(Education) %>%
+  summarise(
+    N = n(),
+    across(
+      all_of(hexad_vars),
+      list(
+        Mean   = ~mean(., na.rm = TRUE),
+        Median = ~median(., na.rm = TRUE),
+        Min    = ~min(., na.rm = TRUE),
+        Max    = ~max(., na.rm = TRUE),
+        SD     = ~sd(., na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  ) %>%
+  # Round all numeric columns except N
+  mutate(across(where(is.numeric) & !matches("^N$"), ~round(.x, 2)))
+
+# 2) Flip the table
+hexad_by_edu_flipped <- hexad_by_edu %>%
+  pivot_longer(
+    cols = -Education,
+    names_to = "Measure",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = Education,
+    values_from = Value
+  )
+
+# Print the table nicely with knitr::kable
+kable(hexad_by_edu_flipped, 
+      caption = "Distribution of Hexad determinants by Education", 
+      digits  = 2)
 
 ```
 
 
-## Hexad Player type Distributions Analysis By Country (top 10)
-
-#### Distribution by Country (Top 10)
-
+#### Appendix A4. Distribution of Hexad items by Country
 ```{r}
 #Shorten Countries Name for easy of tables
 data[data$Country=="Bolivia (Estado Plurinacional de)", 'Country' ]<-"Bolivia"
@@ -329,9 +388,8 @@ top_10_countries <- top_countries %>% slice(1:10) %>% pull(Country)
 hexad_top10 <- hexad_data_clean %>% filter(Country %in% top_10_countries)
 
 
-```
 
-```{r}
+
 
 
 # Calculate and round summary statistics by Country for each player type
@@ -390,115 +448,188 @@ hexad_summary_t %>%
 ```
 
 
-
-#### Normality tests
+#### Appendix A5. Distribution of Hexad determinants by Gender
 ```{r}
+library(dplyr)
+library(tidyr)
+
+# Hexad determinants
+hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+# Summaries by Gender (exclude missing Gender)
+hexad_by_gender <- data %>%
+  filter(!is.na(Gender)) %>%      # drop NA genders
+  group_by(Gender) %>%
+  summarise(
+    N = n(),                      # sample size per gender
+    across(
+      all_of(hexad_vars),
+      list(
+        Mean   = ~mean(., na.rm = TRUE),
+        Median = ~median(., na.rm = TRUE),
+        Min    = ~min(., na.rm = TRUE),
+        Max    = ~max(., na.rm = TRUE),
+        SD     = ~sd(., na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  ) %>%
+  # Round all numeric columns except N
+  mutate(across(where(is.numeric) & !matches("^N$"), ~round(.x, 2)))
+
+# Flip table so:
+#    - Rows = N, philanthropist_Mean, ..., disruptor_SD
+#    - Columns = Gender values
+hexad_by_gender_flipped <- hexad_by_gender %>%
+  pivot_longer(
+    cols = -Gender,
+    names_to = "Measure",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = Gender,
+    values_from = Value
+  )
 
 
-# Initialize an empty data frame to store the results
-shapiro_results <- data.frame(
-  Row = c("Philanthropist", "Socializer", "Free Spirit", "Achiever", "Player", "Disruptor"),
-  Shapiro_Wilk = numeric(6),
-  P_value = numeric(6),
-  stringsAsFactors = FALSE
-)
 
-# List of player types
-player_types <- c("philanthropist", "socializer", "freeSpirit", "achiever", "player", "disruptor")
-
-# Loop through each player type and perform the Shapiro-Wilk test
-for (i in seq_along(player_types)) {
-  type <- player_types[i]
-  
-  # Perform ANOVA to get residuals
-  anova_5 <- aov(as.formula(paste(type, "~ Country")), data = hexad_top10)
-  
-  # Perform Shapiro-Wilk Test
-  shapiro_test <- shapiro.test(residuals(anova_5))
-  
-  # Save results
-  shapiro_results$Shapiro_Wilk[i] <- round(shapiro_test$statistic, 2)
-  shapiro_results$P_value[i] <- shapiro_test$p.value
-}
-
-# Rename columns to match desired output
-colnames(shapiro_results) <- c("Row", "Shapiro-Wilk", "p-value")
-
-# Create and display the RMarkdown table
-shapiro_results %>%
-  kbl(caption = "Shapiro-Wilk Normality Test for Player Types by Country") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-
+kable(hexad_by_gender_flipped, 
+      caption = "Distribution of Hexad determinants by Gender", 
+      digits  = 2)
 
 ```
 
-#### Non-parametric ANOVA tests
+#### Appendix A6. Distribution of Hexad determinants by Age Group
+
 ```{r}
+library(dplyr)
+library(tidyr)
 
-# Initialize an empty data frame to store the results
-results <- data.frame(
-  Row = c("Philanthropist", "Socializer", "Free Spirit", "Achiever", "Player", "Disruptor"),
-  Kruskal_Wallis_Chi_Sq = numeric(6),
-  Degrees_of_Freedom = numeric(6),
-  p_value = numeric(6),
-  stringsAsFactors = FALSE
-)
+# Hexad determinants
+hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
 
-# List of player types
-player_types <- c("philanthropist", "socializer", "freeSpirit", "achiever", "player", "disruptor")
+# Create age groups
+data_age <- data %>%
+  filter(!is.na(Age)) %>%                 
+  mutate(
+    AgeGroup = case_when(
+      Age >= 18 & Age <= 24 ~ "18–24",
+      Age >= 25 & Age <= 34 ~ "25–34",
+      Age >= 35 & Age <= 49 ~ "35–49",
+      Age >= 50             ~ "50+"
+    )
+  ) %>%
+  filter(!is.na(AgeGroup))
 
-# Loop through each player type and perform the Kruskal-Wallis test
-for (i in seq_along(player_types)) {
-  type <- player_types[i]
-  
-  # Perform Kruskal-Wallis Test
-  kw_test <- kruskal.test(as.formula(paste(type, "~ Country")), data = hexad_top10)
-  
-  # Save results
-  results$Kruskal_Wallis_Chi_Sq[i] <- round(kw_test$statistic, 2)
-  results$Degrees_of_Freedom[i] <- kw_test$parameter
-  results$p_value[i] <- round(kw_test$p.value, 3)
-}
+# Summaries per age group
+hexad_by_age <- data_age %>%
+  group_by(AgeGroup) %>%
+  summarise(
+    N = n(),
+    across(
+      all_of(hexad_vars),
+      list(
+        Mean   = ~mean(., na.rm = TRUE),
+        Median = ~median(., na.rm = TRUE),
+        Min    = ~min(., na.rm = TRUE),
+        Max    = ~max(., na.rm = TRUE),
+        SD     = ~sd(., na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  ) %>%
+  # Round all numeric columns except N
+  mutate(across(where(is.numeric) & !matches("^N$"), ~round(.x, 2)))
 
-# Rename columns to match desired output
-colnames(results) <- c(
-  "Row",
-  "Kruskal-Wallis χ^2",
-  "Degrees of Freedom",
-  "p-value"
-)
+# Flip table so rows = stats, columns = age groups
+hexad_by_age_flipped <- hexad_by_age %>%
+  pivot_longer(
+    cols = -AgeGroup,
+    names_to = "Measure",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = AgeGroup,
+    values_from = Value
+  )
 
-# Create and display the RMarkdown table
-results %>%
-  kbl(caption = "Kruskal-Wallis Test Results for Player Types by Country") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 
+
+
+kable(hexad_by_age_flipped, 
+      caption = " Distribution of Hexad determinants by Age Group", 
+      digits  = 2)
+```
+
+#### Apendix A7. Distribution of Hexad determinants by Weekly Gaming Frequency
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Hexad determinants
+hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+# Create game-frequency groups
+data_freq <- data %>%
+  filter(!is.na(Freq.Games)) %>%  
+  mutate(
+    FreqGroup = case_when(
+      Freq.Games >= 1 & Freq.Games <= 2 ~ "1–2 days",
+      Freq.Games >= 3 & Freq.Games <= 4 ~ "3–4 days",
+      Freq.Games >= 5 & Freq.Games <= 7 ~ "5–7 days"
+    )
+  ) %>%
+  filter(!is.na(FreqGroup))
+
+# Summaries per frequency group
+hexad_by_freq <- data_freq %>%
+  group_by(FreqGroup) %>%
+  summarise(
+    N = n(),
+    across(
+      all_of(hexad_vars),
+      list(
+        Mean   = ~mean(., na.rm = TRUE),
+        Median = ~median(., na.rm = TRUE),
+        Min    = ~min(., na.rm = TRUE),
+        Max    = ~max(., na.rm = TRUE),
+        SD     = ~sd(., na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  ) %>%
+  mutate(across(where(is.numeric) & !all_of("N"), ~round(.x, 2)))
+
+# Flip table: rows = stats, columns = freq groups
+hexad_by_freq_flipped <- hexad_by_freq %>%
+  pivot_longer(
+    cols = -FreqGroup,
+    names_to  = "Measure",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from  = FreqGroup,
+    values_from = Value
+  )
+
+
+
+
+kable(hexad_by_freq_flipped, 
+      caption = " Distribution of Hexad determinants by Weekly Gaming Frequency", 
+      digits  = 2)
 
 ```
 
-#### Dunn test for multiple comparison for Achiever
+## 4.3. Distributional checks
 
-```{r}
-
-# Perform Dunn Test with Bonferroni adjustment
-posthoc_test <- dunnTest(achiever ~ Country, data = hexad_top10, method = "bonferroni")
-
-# Extract and round results
-posthoc_results <- posthoc_test$res %>%
-  mutate(across(where(is.numeric), ~ round(.x, 3))) # Round all numeric columns to 3 decimal places
-
-# Format results as a nice RMarkdown table
-posthoc_results %>%
-  kbl(caption = "Post Hoc Dunn Test Results for Achiever by Country (Bonferroni Adjustment)") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-
-
-```
-
-
-## Confirmatory Factor Analysis
-
-#### Mardia’s multivariate normality test 
+#### Appendix A8. Mardia’s multivariate normality test for Hexad-12 items 
 ```{r}
 
 # Perform Mardia's test for multivariate normality
@@ -526,7 +657,98 @@ mardia_results %>%
 
 ```
 
-#### Weighted Least Squares Mean and Variance Adjusted   CFA
+
+
+## 4.4. Item-level diagnostics
+
+#### Appendix A9. Summary Statistics per item
+```{r}
+
+merged_hexad<-data
+item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
+df_items  <- merged_hexad[ , item_cols ]
+
+# Descriptive statistics
+desc_stats <- describe(df_items)
+
+kable(desc_stats, caption = "Summary Statistics per item",digits  = 2)
+
+
+
+
+
+```
+
+
+#### Appendix A10. Response distributions for each Hexad-12 item
+```{r}
+
+item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
+df_items <- merged_hexad[, item_cols]
+
+# Reshape to long format for plotting
+df_long <- df_items %>%
+  pivot_longer(cols      = everything(),
+               names_to  = "item",
+               values_to = "score")
+
+# Faceted histograms
+ggplot(df_long, aes(x = score)) +
+  geom_histogram(bins = 30, color = "black", fill = "lightblue") +
+  facet_wrap(~ item, scales = "free") +
+  labs(title = "Hexad-12 Item Distributions",
+       x     = "Response",
+       y     = "Count") +
+  theme_minimal()
+
+
+```
+
+
+
+#### Appendix A11. Multimodality Silverman tests results
+```{r, cache=TRUE}
+
+
+set.seed(123)  # For reproducibility
+
+for(it in item_cols) {
+  x <- na.omit(merged_hexad[[it]])
+  # Silverman’s test (mod0=1 ⇒ test unimodality vs. multimodality)
+  si <- modetest(x, mod0 = 1, method = "SI", B = num_bootstrap)
+  
+  cat(sprintf(
+    "%-3s  bw = %.3f  p = %.3f\n",
+    it,
+    si$statistic,   # critical bandwidth
+    si$p.value      # p-value
+  ))
+}
+```
+
+
+#### Appendix A12. Item–total correlation for each subscale
+
+```{r}
+
+# Item–total correlations
+merged_hexad$total_score <- rowSums(df_items, na.rm=TRUE)
+item_total_corrs <- map_dbl(item_cols, ~ cor(
+  merged_hexad[[.x]],
+  merged_hexad$total_score - merged_hexad[[.x]],
+  use = "pairwise.complete.obs"
+))
+names(item_total_corrs) <- item_cols
+
+
+
+kable(item_total_corrs, caption = "Item–total correlation for each subscale",digits  = 2)
+```
+
+## 4.5. Confirmatory Factor Analysis
+
+
+#### Table 4: Estimated factor loadings for Hexad-12 items
 ```{r}
 # Specify the CFA model
 cfa_model <- '
@@ -544,11 +766,6 @@ fit <- cfa(cfa_model, data = data,std.lv=TRUE, auto.efa = TRUE, estimator = "WLS
 # Global Fit Metrics
 results<-summary(fit, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
 
-
-
-
-# install.packages("kableExtra")  # if you haven’t already
-
 kable(
   results$pe[1:12, c(2:8, 10)],
   caption = "Estimated factor loading for Hexad-12 items",
@@ -562,10 +779,26 @@ kable(
 
 ```
 
+#### CFA
 
-
-###  CFA  metrics with confident interval
 ```{r}
+# Confirmatory Factor Analysis
+model <- '
+  Achiever       =~ A2 + A4
+  Disruptor      =~ D3 + D4
+  FreeSpirit     =~ F1 + F3
+  Philanthropist =~ P1 + P4
+  Player         =~ R2 + R4
+  Socializer     =~ S2 + S4
+'
+fit <- cfa(model, data = merged_hexad, estimator = "WLSMV")
+#summary(fit, fit.measures = TRUE, standardized = TRUE)
+```
+
+
+####  CFA  fit indices with 95% CI using  bootstrapping with 10,000 samples  (Table 5)
+```{r, cache=TRUE}
+
 
 reliability_metrics <- semTools::reliability(fit)
 CR<-reliability_metrics[2,]
@@ -603,7 +836,7 @@ reliability_metrics <- semTools::reliability(fit)
 
 # Perform bootstrap sampling
 set.seed(123)  # For reproducibility
-num_bootstrap <- 10000  # Number of bootstrap samples8u-p0
+
 
 # Initialize matrix to store CR, Omega, and AVE
 fit_metrics <- matrix(NA, nrow = num_bootstrap, ncol = 17)
@@ -644,12 +877,93 @@ for (i in seq_along(columns_to_ci)) {
 
 # Correctly print the table in a nicely formatted way
 results_table %>%
-  kbl(caption = "CFA  metrics with confident interval", format = "markdown",digits  = 2) %>%
+  kbl(caption = "CFA  metrics with confident interval", format = "markdown",digits  = 3) %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 
 ```
 
-#### CFA Standardized residuals
+
+####  CFA  fit indices with 95% CI using  bootstrapping with 10,000 samples (Sensitivy analysis:without "fast_responders"  < 52.28sec )
+
+```{r, cache=TRUE}
+
+hexad_data_52<-data[data$Completion.Time>52.28, ]
+# Function to take a bootstrap sample and perform CFA, returning CR, Omega, and AVE
+bootstrap_cfa_cr_omega_ave <- function(data, cfa_model) {
+  # Generate a bootstrap sample (with replacement)
+  bootstrap_sample <- data[sample(1:nrow(data), replace = TRUE), ]
+  
+
+# Fit the CFA model
+fit <- cfa(cfa_model, data = bootstrap_sample,std.lv=TRUE, auto.efa = TRUE, estimator = "WLSMV")
+
+ # Calculate reliability metrics (including Composite Reliability)
+reliability_metrics <- semTools::reliability(fit)
+  CR<-reliability_metrics[2,]
+ AVE<-reliability_metrics[5,]
+  
+
+  # Extract relevant fit measures
+  fit_measures <- fitMeasures(fit, c("chisq.scaled", "srmr", "tli.scaled", "cfi.scaled", "rmsea.scaled"))
+
+  fit_measures<-c(fit_measures, CR, AVE)
+ 
+  return(fit_measures)
+}
+
+# Perform bootstrap sampling
+set.seed(123)  # For reproducibility
+
+# Initialize matrix to store CR, Omega, and AVE
+fit_metrics <- matrix(NA, nrow = num_bootstrap, ncol = 17)
+# List of columns to calculate confidence intervals for
+columns_to_ci <- c("chisq.scaled", "srmr", "tli.scaled", "cfi.scaled", "rmsea.scaled", 
+                   "CR.Achiever", "CR.Disruptor", "CR.FreeSpirit", "CR.Philanthropist", 
+                   "CR.Player", "CR.Socializer", 
+                   "AVE.Achiever", "AVE.Disruptor", "AVE.FreeSpirit", 
+                   "AVE.Philanthropist", "AVE.Player", "AVE.Socializer")
+colnames(fit_metrics) <- columns_to_ci
+
+# Bootstrap loop
+for (i in 1:num_bootstrap) {
+  fit_metrics[i, ] <- bootstrap_cfa_cr_omega_ave(hexad_data_52, cfa_model)
+}
+dim(hexad_data_52)
+
+
+  names(fit_measures_final) <- columns_to_ci
+  #summary(fit, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+  
+
+# Initialize an empty data frame to store the results
+results_table_52 <- data.frame(
+  Metric = columns_to_ci,
+  Estimate = numeric(length(columns_to_ci)),
+  CI_Lower = numeric(length(columns_to_ci)),
+  CI_Upper = numeric(length(columns_to_ci)),
+  stringsAsFactors = FALSE
+)
+
+# Populate the results table with confidence intervals and estimates
+for (i in seq_along(columns_to_ci)) {
+  col <- columns_to_ci[i]
+  ci <- quantile(fit_metrics[, col], probs = c(0.025, 0.975))
+  results_table_52$Estimate[i] <- round(fit_measures_final[col], 3)  # Add the estimate and round
+  results_table_52$CI_Lower[i] <- round(ci[1], 3)  # Round lower CI
+  results_table_52$CI_Upper[i] <- round(ci[2], 3)  # Round upper CI
+}
+
+
+# Correctly print the table in a nicely formatted way
+results_table_52[1:5,] %>%
+  kbl(caption = "CFA  metrics with confident interval", format = "markdown",digits  = 3) %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+
+```
+
+
+#### Appendix A13. Standardized Residuals for the Hexad-12 items from the CFA
 ```{r}
 # Local Fit: Residuals  Standardized residuals
 standardized_residuals <- residuals(fit, type = "standardized")
@@ -659,7 +973,7 @@ kable(standardized_residuals, caption = "Standardized Residuals for the Hexad-12
 
 ```
 
-#### CFA Correlation residuals
+#### Appendix A14. Correlation Residuals for the Hexad-12 items from the CFA
 ```{r}
 #Correlation residuals
 
@@ -668,104 +982,421 @@ kable(residuals(fit, type = "cor"), caption = "Correlation Residuals for the Hex
 
 ```
 
-
-## Internal Reliability
+#### Appendix A15. Modification indices Hexad-12 scale
 
 ```{r}
-# Load necessary libraries
-library(psych)  # For Cronbach's alpha and McDonald's omega
-library(boot)   # For bootstrapping confidence intervals
 
-# Define pairs of columns for which to calculate reliability metrics
-pairs <- list(
-  c("A2", "A4"),
-  c("D3", "D4"),
-  c("F1", "F3"),
-  c("P1", "P4"),
-  c("R2", "R4"),
-  c("S2", "S4")
+
+# Extract all modification indices, sorted from highest to lowest
+mi <- modindices(fit, sort. = TRUE)
+
+# Show the top 20 largest MIs for inspection
+table_MI<-mi[,c(1:5,7)]
+colnames(table_MI)<-c("Path", "", "", "MI", "EPC", "Std.EPC")
+
+
+kable(head(table_MI, 10), caption = " Modification indices Hexad-12 scale",digits  = 3)
+
+```
+
+
+## 4.6. Reliability
+
+#### Table 5: Reliability metrics
+```{r, cache=TRUE}
+
+
+set.seed(123)
+
+
+subscale_pairs <- list(
+  Philanthropist = c("P1", "P4"),
+  Socializer     = c("S2", "S4"),
+  Achiever       = c("A2", "A4"),
+  Player         = c("R2", "R4"),
+  Disruptor      = c("D3", "D4"),
+  `Free Spirit`  = c("F1", "F3")
 )
 
-
-merged_hexad<-data
-# Cronbach's alpha function
-cronbach_alpha_fn <- function(data, indices, item1, item2) {
-  samp <- data[indices, c(item1, item2)]
-  psych::alpha(samp)$total$raw_alpha
+# Coerce characters to numeric once
+for (nm in unique(unlist(subscale_pairs))) {
+  if (is.character(merged_hexad[[nm]])) merged_hexad[[nm]] <- as.integer(merged_hexad[[nm]])
 }
 
-# Spearman-Brown function
+
+safe_boot_ci <- function(boot_obj, probs = c(0.025, 0.975)) {
+  x <- boot_obj$t
+  x <- x[is.finite(x)]
+  if (length(x) < 50) return(c(NA, NA))
+  quantile(x, probs = probs, na.rm = TRUE)
+}
+
+# Spearman–Brown
 spearman_brown_fn <- function(data, indices, item1, item2) {
-  samp <- data[indices, ]
-  r <- cor(samp[[item1]], samp[[item2]], method = "pearson", use = "pairwise.complete.obs")
-  2 * r / (1 + r)
+  samp <- data[indices, c(item1, item2)]
+  r <- suppressWarnings(cor(samp[[item1]], samp[[item2]], method = "pearson",
+                            use = "pairwise.complete.obs"))
+  2*r/(1+r)
 }
 
-# McDonald's omega function
+# McDonald's omega
 mcdonald_omega_fn <- function(data, indices, item1, item2) {
   samp <- data[indices, c(item1, item2)]
-  # fit 1-factor model and extract total omega
-  psych::omega(samp, nfactors = 1, plot = FALSE)$omega.tot
+  suppressWarnings(psych::omega(samp, nfactors = 1, plot = FALSE)$omega.tot)
 }
 
-# Prepare results data frame
-results <- data.frame(
-  Pair                      = character(),
-  Alpha_Estimate            = numeric(), Alpha_CI_Lower = numeric(), Alpha_CI_Upper = numeric(),
-  Spearman_Brown_Estimate   = numeric(), SB_CI_Lower    = numeric(), SB_CI_Upper    = numeric(),
-  Omega_Estimate            = numeric(), Omega_CI_Lower = numeric(), Omega_CI_Upper = numeric(),
-  stringsAsFactors = FALSE
+# Ordinal omega (polychoric)
+ordinal_omega_psych_fn <- function(data, indices, item1, item2) {
+  samp <- data[indices, c(item1, item2)]
+  # ordered factors
+  samp[[item1]] <- ordered(samp[[item1]])
+  samp[[item2]] <- ordered(samp[[item2]])
+  out <- try(psych::omega(samp, nfactors=1, plot=FALSE, poly=TRUE)$omega.tot,
+             silent = TRUE)
+  if (inherits(out, "try-error")) return(NA) else out
+}
+
+# Ordinal Composite Reliability via WLSMV CFA
+ordinal_cr_twoitem <- function(data, indices, item1, item2) {
+  samp <- data[indices, c(item1, item2)]
+
+  # enforce ordered factors
+  lvls <- sort(unique(na.omit(c(samp[[item1]], samp[[item2]]))))
+  if (all(lvls %in% 1:7)) lvls <- 1:7
+  samp[[item1]] <- factor(samp[[item1]], levels = lvls, ordered = TRUE)
+  samp[[item2]] <- factor(samp[[item2]], levels = lvls, ordered = TRUE)
+
+  mdl <- paste0("f =~ ", item1, " + ", item2)
+
+  fit <- try(
+    lavaan::cfa(mdl, data = samp, ordered = c(item1, item2),
+                estimator = "WLSMV", std.lv = TRUE),
+    silent = TRUE
+  )
+  if (inherits(fit, "try-error")) return(NA)
+
+  ss <- standardizedSolution(fit)
+  lam <- ss[ss$op == "=~" & ss$lhs == "f", "est.std"]
+  the <- ss[ss$op == "~~" & ss$lhs == ss$rhs, "est.std"]
+
+  num <- (sum(lam))^2
+  den <- num + sum(the)
+  num/den
+}
+
+
+R_boot <- num_bootstrap  # user-defined earlier
+
+final_results <- list()
+
+for (sb in names(subscale_pairs)) {
+  item1 <- subscale_pairs[[sb]][1]
+  item2 <- subscale_pairs[[sb]][2]
+
+  # ----- Spearman-Brown -----
+  sb_boot <- boot(merged_hexad, statistic = spearman_brown_fn,
+                  R = R_boot, item1 = item1, item2 = item2)
+  sb_est <- sb_boot$t0
+  sb_ci  <- safe_boot_ci(sb_boot)
+
+  # ----- McDonald's omega -----
+  om_boot <- boot(merged_hexad, statistic = mcdonald_omega_fn,
+                  R = R_boot, item1 = item1, item2 = item2)
+  om_est <- om_boot$t0
+  om_ci  <- safe_boot_ci(om_boot)
+
+  # ----- Ordinal omega -----
+  oo_boot <- boot(merged_hexad, statistic = ordinal_omega_psych_fn,
+                  R = R_boot, item1 = item1, item2 = item2)
+  oo_est <- oo_boot$t0
+  oo_ci  <- safe_boot_ci(oo_boot)
+
+
+  final_results[[sb]] <- tibble(
+    Subscale = sb,
+    SB_Estimate = round(sb_est, 2),
+    SB_CI_Lower = round(sb_ci[1], 2),
+    SB_CI_Upper = round(sb_ci[2], 2),
+
+    Omega_Estimate = round(om_est, 2),
+    Omega_CI_Lower = round(om_ci[1], 2),
+    Omega_CI_Upper = round(om_ci[2], 2),
+
+    OrdOmega_Estimate = round(oo_est, 2),
+    OrdOmega_CI_Lower = round(oo_ci[1], 2),
+    OrdOmega_CI_Upper = round(oo_ci[2], 2),
+
+  )
+}
+
+
+final_table <- bind_rows(final_results)
+
+kable(t(as.matrix(final_table)), caption = " Reliability Table for  Hexad-12 Subscales", digits = 3)
+
+```
+```{r}
+
+
+set.seed(123)
+
+subscale_items <- list(
+  "Philanthropist" = c("P1", "P4"),
+  "Socializer"     = c("S2", "S4"),
+  "Achiever"       = c("A2", "A4"),
+  "Player"         = c("R2", "R4"),
+  "Disruptor"      = c("D3", "D4"),
+  "Free Spirit"    = c("F1", "F3")
 )
 
-# Loop through each pair and bootstrap all three metrics
-for (pair in pairs) {
-  item1 <- pair[1]; item2 <- pair[2]
-  pair_name <- paste(item1, item2, sep = "_")
-  
-  # Cronbach's alpha bootstrap
-  alpha_boot <- boot(data = merged_hexad, statistic = cronbach_alpha_fn,
-                     R = 10000, item1 = item1, item2 = item2)
-  alpha_est <- alpha_boot$t0
-  alpha_ci  <- boot.ci(alpha_boot, type = "perc")$percent[4:5]
-  
-  # Spearman-Brown bootstrap
-  sb_boot <- boot(data = merged_hexad, statistic = spearman_brown_fn,
-                  R = 10000, item1 = item1, item2 = item2)
-  sb_est <- sb_boot$t0
-  sb_ci  <- boot.ci(sb_boot, type = "perc")$percent[4:5]
-  
-  # McDonald's omega bootstrap
-  omega_boot <- boot(data = merged_hexad, statistic = mcdonald_omega_fn,
-                     R = 10000, item1 = item1, item2 = item2)
-  omega_est <- omega_boot$t0
-  omega_ci  <- boot.ci(omega_boot, type = "perc")$percent[4:5]
-  
-  # Append to results
-  results <- rbind(results, data.frame(
-    Pair                    = pair_name,
-    Alpha_Estimate          = round(alpha_est,  2),
-    Alpha_CI_Lower          = round(alpha_ci[1], 2),
-    Alpha_CI_Upper          = round(alpha_ci[2], 2),
-    Spearman_Brown_Estimate = round(sb_est,     2),
-    SB_CI_Lower             = round(sb_ci[1],  2),
-    SB_CI_Upper             = round(sb_ci[2],  2),
-    Omega_Estimate          = round(omega_est,  2),
-    Omega_CI_Lower          = round(omega_ci[1], 2),
-    Omega_CI_Upper          = round(omega_ci[2], 2)
-  ))
+# If some items are stored as character, coerce once to integers
+for (nm in unique(unlist(subscale_items))) {
+  if (is.character(merged_hexad[[nm]])) merged_hexad[[nm]] <- as.integer(merged_hexad[[nm]])
 }
 
-# Print the results
+safe_boot_ci <- function(x, probs = c(0.025, 0.975)) {
+  x <- x[is.finite(x)]
+  if (length(x) < 50) return(c(NA_real_, NA_real_))  # too few valid draws
+  as.numeric(quantile(x, probs = probs, na.rm = TRUE, names = FALSE))
+}
+
+# --------- Ordinal CR for a TWO-ITEM subscale via ordinal CFA ----------
+# CR = (sum(lambda))^2 / ((sum(lambda))^2 + sum(theta)),
+# where lambda, theta are from the STANDARDIZED solution of a WLSMV CFA with ordered indicators.
+ordinal_cr_twoitem <- function(data, indices, item1, item2) {
+  samp <- data[indices, c(item1, item2)]
+
+  # Guard against degenerate resamples (need >= 2 categories in each item)
+  if (length(unique(na.omit(samp[[item1]]))) < 2 ||
+      length(unique(na.omit(samp[[item2]]))) < 2) return(NA_real_)
+
+  # Make ordered factors (preserve 1:7 if applicable)
+  all_lvls <- sort(unique(na.omit(c(samp[[item1]], samp[[item2]]))))
+  if (all(all_lvls %in% 1:7)) all_lvls <- 1:7
+  samp[[item1]] <- factor(samp[[item1]], levels = all_lvls, ordered = TRUE)
+  samp[[item2]] <- factor(samp[[item2]], levels = all_lvls, ordered = TRUE)
+
+  mdl <- paste0("f =~ ", item1, " + ", item2)
+
+  fit <- try(
+    lavaan::cfa(
+      mdl,
+      data      = samp,
+      ordered   = c(item1, item2),
+      estimator = "WLSMV",
+      std.lv    = TRUE,
+      warn      = FALSE
+    ),
+    silent = TRUE
+  )
+  if (inherits(fit, "try-error")) return(NA_real_)
+
+  # Extract standardized loadings and residual variances
+  ss <- try(lavaan::standardizedSolution(fit), silent = TRUE)
+  if (inherits(ss, "try-error")) return(NA_real_)
+
+  lam <- ss[ss$op == "=~" & ss$lhs == "f" & ss$rhs %in% c(item1, item2), "est.std"]
+  the <- ss[ss$op == "~~" & ss$lhs == ss$rhs & ss$lhs %in% c(item1, item2), "est.std"]
+
+  if (length(lam) != 2L || length(the) != 2L) return(NA_real_)
+  if (!all(is.finite(lam)) || !all(is.finite(the))) return(NA_real_)
+
+  num <- (sum(lam))^2
+  den <- num + sum(the)
+  cr  <- num / den
+  as.numeric(cr)
+}
+
+# --------- Compute Ordinal CR + 95% CI for each subscale ----------
+  # reduce to 5000 for speed if needed
+
+ordCR_est <- c(); ordCR_ciL <- c(); ordCR_ciU <- c()
+
+for (sb in names(subscale_items)) {
+  it <- subscale_items[[sb]]
+  b <- boot(
+    data      = merged_hexad,
+    statistic = ordinal_cr_twoitem,
+    R         = R_boot,
+    item1     = it[1],
+    item2     = it[2]
+  )
+  ordCR_est[sb] <- b$t0
+  ci <- safe_boot_ci(b$t)
+  ordCR_ciL[sb] <- ci[1]; ordCR_ciU[sb] <- ci[2]
+}
+
+# --------- Results as a tidy data frame ----------
+ordinal_cr_results <- data.frame(
+  Subscale = names(subscale_items),
+  OrdCR_Estimate   = round(ordCR_est, 2),
+  OrdCR_CI_Lower   = round(ordCR_ciL, 2),
+  OrdCR_CI_Upper   = round(ordCR_ciU, 2),
+  row.names = NULL,
+  check.names = FALSE
+)
 
 
-kable(results, caption = "Internal reliability, Composite Reliability (CR) estimates, and Average Variance Extracted (AVE) for each Hexad-12 scale. ",digits  = 2)
+kable(ordinal_cr_results, caption = " Oridinal CR for  Hexad-12 Subscales", digits = 3)
+
+
+```
+
+## 4.7. Convergent and discriminant validity
+
+#### Appendix A16. Heterotrait–Monotrait (HTMT) ratios
+
+```{r, cache=TRUE}
+
+
+set.seed(123)
+hexad_data<-data
+
+stopifnot(exists("hexad_data"))
+
+ord_items <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
+
+# Coerce to integer if needed
+for (v in ord_items) if (is.character(hexad_data[[v]])) hexad_data[[v]] <- as.integer(hexad_data[[v]])
+
+# Items per factor (labels used in tables)
+blocks <- list(
+  Philanthropist = c("P1","P4"),
+  Socializer     = c("S2","S4"),
+  FreeSpirit     = c("F1","F3"),
+  Achiever       = c("A2","A4"),
+  Player         = c("R2","R4"),
+  Disruptor      = c("D3","D4")
+)
+fac_names <- names(blocks)
+
+#--------------------------- CFA (ordinal WLSMV) ---------------------------
+cfa_model <- '
+  Achiever       =~ A2 + A4
+  Disruptor      =~ D3 + D4
+  FreeSpirit     =~ F1 + F3
+  Philanthropist =~ P1 + P4
+  Player         =~ R2 + R4
+  Socializer     =~ S2 + S4
+'
+fit_wlsmv <- cfa(
+  cfa_model,
+  data             = hexad_data,
+  estimator        = "WLSMV",
+  ordered          = ord_items,
+  parameterization = "theta",
+  std.lv           = TRUE
+)
+
+
+htmt_from_R <- function(R, blocks) {
+  f <- length(blocks)
+  out <- matrix(NA_real_, f, f, dimnames = list(names(blocks), names(blocks)))
+
+  # within-construct mean |r|
+  within <- vapply(blocks, function(items) {
+    if (length(items) < 2) return(NA_real_)
+    idx <- combn(items, 2, simplify = FALSE)
+    mean(abs(vapply(idx, function(p) R[p[1], p[2]], 0.0)), na.rm = TRUE)
+  }, 0.0)
+
+  for (i in seq_len(f-1)) {
+    for (j in (i+1):f) {
+      a <- blocks[[i]]; b <- blocks[[j]]
+      num <- mean(as.vector(abs(R[a, b, drop = FALSE])), na.rm = TRUE)
+      den <- sqrt(within[i] * within[j])
+      out[i, j] <- num / den
+      out[j, i] <- out[i, j]
+    }
+  }
+  out
+}
+
+# Bootstrap CI helpers (scalar outputs)
+get_ci <- function(x) {
+  x <- x[is.finite(x)]
+  if (length(x) < 50) return(c(NA_real_, NA_real_))
+  as.numeric(stats::quantile(x, c(0.025, 0.975), na.rm = TRUE, names = FALSE))
+}
+get_ci_lower <- function(x) get_ci(x)[1]
+get_ci_upper <- function(x) get_ci(x)[2]
+
+use_semtools <- FALSE
+HTMT_mat <- NULL
+
+if (requireNamespace("semTools", quietly = TRUE)) {
+  # Older semTools::htmt() often has no 'type' arg; try plain call.
+  try({
+    HTMT_mat <- semTools::htmt(fit_wlsmv)
+    use_semtools <- TRUE
+  }, silent = TRUE)
+}
+
+if (!use_semtools || is.null(HTMT_mat)) {
+  message("Falling back to manual HTMT using polychoric correlations (lavaan::lavCor).")
+  R_poly <- lavaan::lavCor(
+    hexad_data[, ord_items, drop = FALSE],
+    ordered   = ord_items,
+    estimator = "WLSMV"
+  )
+  R_poly <- R_poly[ord_items, ord_items]
+  HTMT_mat <- htmt_from_R(R_poly, blocks)
+}
+
+HTMT_max <- max(HTMT_mat[upper.tri(HTMT_mat)], na.rm = TRUE)
+cat("\nMaximum HTMT:", round(HTMT_max, 3),
+    " | Strict OK (< .85)?", HTMT_max < .85,
+    " | Lenient OK (< .90)?", HTMT_max < .90, "\n\n")
+
+
+R_boot <- num_bootstrap   # use 10000 for final paper
+HTMT_cube <- array(NA_real_, dim = c(length(blocks), length(blocks), R_boot),
+                   dimnames = list(fac_names, fac_names, NULL))
+
+boot_ids <- replicate(R_boot, sample(seq_len(nrow(hexad_data)), replace = TRUE), simplify = FALSE)
+
+for (b in seq_len(R_boot)) {
+  samp <- hexad_data[boot_ids[[b]], ord_items, drop = FALSE]
+  Rb <- try(lavaan::lavCor(samp, ordered = ord_items, estimator = "WLSMV"), silent = TRUE)
+  if (inherits(Rb, "try-error")) next
+  Rb <- Rb[ord_items, ord_items]
+  HTMT_b <- htmt_from_R(Rb, blocks)
+  HTMT_cube[, , b] <- HTMT_b
+}
+
+# Upper-triangle pairs table with scalar CI columns
+pairs <- as.data.frame(t(combn(fac_names, 2)), stringsAsFactors = FALSE)
+colnames(pairs) <- c("Factor1","Factor2")
+
+appendix_tbl <- pairs %>%
+  rowwise() %>%
+  mutate(
+    HTMT     = HTMT_mat[Factor1, Factor2],
+    CI_lower = get_ci_lower(HTMT_cube[Factor1, Factor2, ]),
+    CI_upper = get_ci_upper(HTMT_cube[Factor1, Factor2, ]),
+    Strict_OK  = HTMT < .85,
+    Lenient_OK = HTMT < .90
+  ) %>%
+  ungroup() %>%
+  mutate(
+    HTMT     = round(HTMT, 3),
+    CI_lower = round(CI_lower, 3),
+    CI_upper = round(CI_upper, 3)
+  )
+
+print(knitr::kable(
+  appendix_tbl[, c(1:5)],
+  caption = paste0("HTMT (polychoric) with 95% bootstrap CIs; max HTMT = ",
+                   round(HTMT_max, 3),
+                   "  [R_boot = ", R_boot, "]")
+))
+
 
 
 ```
 
 
-
-## Correlaiton metric Kendals Tau
+#### Table 6 Bivariate correlation coefficients Kendall's tau between the Hexad subscales
 ```{r}
 
 # Reorganize columns in the desired order
@@ -810,96 +1441,907 @@ cor_matrix_df %>%
 
 ```
 
-# Item by Item Analysis
-```{r}
-# Required packages
-library(psych)       # describe(), alpha(), omega()
-library(lavaan)      # cfa()
-library(semTools)    # omegaSem()
-library(ggplot2)     # plotting
-library(dplyr)       # data wrangling
-library(purrr)       # map*
-
-# Define your 12 item columns
-item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
-df_items  <- merged_hexad[ , item_cols ]
-
-# 1. Descriptive statistics
-desc_stats <- describe(df_items)
-
-kable(desc_stats, caption = "Summary Statistics per item",digits  = 2)
-
-
-# 2. Item–total correlations
-merged_hexad$total_score <- rowSums(df_items, na.rm=TRUE)
-item_total_corrs <- map_dbl(item_cols, ~ cor(
-  merged_hexad[[.x]],
-  merged_hexad$total_score - merged_hexad[[.x]],
-  use = "pairwise.complete.obs"
-))
-names(item_total_corrs) <- item_cols
 
 
 
-kable(item_total_corrs, caption = "Item–total correlation for each subscale",digits  = 2)
-
-
-
-```
-
-
-
-```{r}
-# install.packages(c("ggplot2","diptest","tidyr","dplyr","purrr"))
-library(ggplot2)
-library(diptest)
-library(tidyr)
-library(dplyr)
-library(purrr)
-
-# 1. Define your 12 item columns and subset
-item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
-df_items <- merged_hexad[, item_cols]
-
-# 2. Reshape to long format for plotting
-df_long <- df_items %>%
-  pivot_longer(cols      = everything(),
-               names_to  = "item",
-               values_to = "score")
-
-# 3. Faceted histograms
-ggplot(df_long, aes(x = score)) +
-  geom_histogram(bins = 30, color = "black", fill = "lightblue") +
-  facet_wrap(~ item, scales = "free") +
-  labs(title = "Hexad-12 Item Distributions",
-       x     = "Response",
-       y     = "Count") +
-  theme_minimal()
-
-
-```
-
+####  Appendix A17. Latent correlations among Hexad determinants
 ```{r}
 
-#––– 1. Load libraries
-library(moments)    # for skewness() and kurtosis()
-library(multimode)  # for silverman.test()
-library(dplyr)      # for data manipulation
-library(tidyr)      # if you later want to reshape for plots
-library(purrr)      # for map functions
-library(ggplot2)    # for any plotting
-
-
-for(it in item_cols) {
-  x <- na.omit(merged_hexad[[it]])
-  # Silverman’s test (mod0=1 ⇒ test unimodality vs. multimodality)
-  si <- modetest(x, mod0 = 1, method = "SI", B = 10000)
-  
-  cat(sprintf(
-    "%-3s  bw = %.3f  p = %.3f\n",
-    it,
-    si$statistic,   # critical bandwidth
-    si$p.value      # p-value
-  ))
+if (!exists("fit") || !inherits(fit, "lavaan")) {
+  library(lavaan)
+  if (!exists("cfa_model")) {
+    cfa_model <- '
+      Achiever       =~ A2 + A4
+      Disruptor      =~ D3 + D4
+      FreeSpirit     =~ F1 + F3
+      Philanthropist =~ P1 + P4
+      Player         =~ R2 + R4
+      Socializer     =~ S2 + S4
+    '
+  }
+  fit <- cfa(cfa_model, data = hexad_data, std.lv = TRUE, estimator = "WLSMV")
 }
+
+lat_cor <- lavaan::lavInspect(fit, "cor.lv")
+
+# Order factors consistently for reporting
+desired_order <- c("Philanthropist","Socializer","FreeSpirit","Achiever","Player","Disruptor")
+ord <- intersect(desired_order, colnames(lat_cor))
+lat_cor <- lat_cor[ord, ord, drop = FALSE]
+
+
+pe <- lavaan::parameterEstimates(fit, standardized = TRUE, ci = TRUE)
+
+lat_ci <- subset(
+  pe,
+  op == "~~" & lhs != rhs &
+    lhs %in% ord & rhs %in% ord,
+  select = c(lhs, rhs, std.all, ci.lower, ci.upper)
+)
+
+# Rename columns for clarity
+colnames(lat_ci) <- c("Factor 1", "Factor 2", "Latent r", "95% CI Lower", "95% CI Upper")
+
+# Sort alphabetically
+lat_ci <- lat_ci[order(lat_ci$`Factor 1`, lat_ci$`Factor 2`), ]
+
+
+kable(lat_ci, caption = " Latent correlations among Hexad determinants", digits = 3)
+
+
+```
+
+## 4.8. Criterion-related and group-level analyses
+
+### Game frequency-related patterns in Hexad-12 scores.
+
+#### Appendix A18. Correlations between Hexad determinants and gaming frequency
+```{r}
+
+
+data_hexad <- data    
+
+freq_var <- "Freq.Games"
+
+hexad_cols <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+# 1. Clean frequency input
+hexad_clean <- data_hexad %>%
+  mutate(
+    Freq_raw = trimws(as.character(.data[[freq_var]])),
+    Freq     = suppressWarnings(as.numeric(Freq_raw))
+  ) %>%
+  filter(!is.na(Freq))
+
+total_n <- nrow(hexad_clean)
+
+# 2. Retain only determinant columns that exist and coerce to numeric
+present_hexad <- intersect(hexad_cols, names(hexad_clean))
+
+for (v in present_hexad) {
+  hexad_clean[[v]] <- suppressWarnings(as.numeric(as.character(hexad_clean[[v]])))
+}
+
+# 3. Loop correlations and bind into one table
+results_df <- lapply(present_hexad, function(var_name) {
+  
+  ct <- suppressWarnings(
+    cor.test(hexad_clean$Freq,
+             hexad_clean[[var_name]],
+             method = "kendall", 
+             exact = FALSE)
+  )
+  
+  data.frame(
+    Determinant = var_name,
+    n           = total_n,
+    tau         = unname(ct$estimate),
+    p_value     = ct$p.value,
+    stringsAsFactors = FALSE
+  )
+}) %>% bind_rows()
+
+# 4. Print table
+kable(results_df,
+      caption = "Correlations between Hexad determinants and gaming frequency",
+      digits = 3)
+
+```
+
+#### Appendix A19. Kruskal–Wallis test for Hexad determinants by gaming frequency
+```{r}
+library(dplyr)
+library(tidyr)
+
+
+
+data_hexad <- data       #
+
+freq_var <- "Freq.Games"       # game-frequency variable
+
+hexad_cols <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+
+hexad_clean <- data_hexad %>%
+  mutate(
+    Freq_raw = trimws(as.character(.data[[freq_var]])),
+    Freq     = suppressWarnings(as.numeric(Freq_raw))
+  ) %>%
+  filter(!is.na(Freq))
+
+present_hexad_cols <- intersect(hexad_cols, names(hexad_clean))
+
+hexad_clean <- hexad_clean %>%
+  mutate(across(
+    all_of(present_hexad_cols),
+    ~ suppressWarnings(as.numeric(as.character(.x)))
+  ))
+
+
+
+# (a) total sample size per frequency
+n_by_freq <- hexad_clean %>%
+  count(Freq, name = "n_total") %>%
+  arrange(Freq)
+
+
+# sum(n_by_freq$n_total) should be 648
+
+
+
+
+hexad_grouped <- hexad_clean %>%
+  mutate(
+    FreqGroup = case_when(
+      Freq %in% 1:2 ~ "1--2 days",
+      Freq %in% 3:4 ~ "3--4 days",
+      Freq %in% 5:7 ~ "5--7 days",
+      TRUE          ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(FreqGroup))
+
+# sample size per group
+n_by_group <- hexad_grouped %>%
+  count(FreqGroup, name = "n_total") %>%
+  arrange(match(FreqGroup, c("1--2 days", "3--4 days", "5--7 days")))
+
+
+
+
+kw_results <- hexad_grouped %>%
+  # Reshape to long format
+  pivot_longer(
+    cols      = all_of(present_hexad_cols),
+    names_to  = "Determinant",
+    values_to = "Score"
+  ) %>%
+  group_by(Determinant) %>%
+  summarise(
+    n_total   = n(),
+    n_groups  = n_distinct(FreqGroup),
+    # Run the test
+    test_res  = list(kruskal.test(Score ~ FreqGroup)),
+    .groups   = "drop"
+  ) %>%
+  # Extract statistics
+  mutate(
+    statistic = map_dbl(test_res, "statistic"),
+    df        = map_dbl(test_res, "parameter"),
+    p_value   = map_dbl(test_res, "p.value")
+  ) %>%
+  # Apply Benjamini-Hochberg correction
+  mutate(
+    p_adj_BH  = p.adjust(p_value, method = "BH")
+  ) %>%
+  # FIX: Use dplyr::select to avoid conflicts
+  dplyr::select(-test_res) %>%
+  arrange(Determinant)
+
+
+
+kw_formatted <- kw_results %>%
+  mutate(
+    statistic = round(statistic, 2),
+    p_value   = round(p_value, 3),
+    p_adj_BH  = round(p_adj_BH, 3)
+  )
+
+
+kable(kw_formatted[,-7], caption = "Kruskal–Wallis test for Hexad determinants by gaming frequency")
+```
+
+
+#### Multigroup Confirmatory factor Analysis 
+```{r}
+
+data_cfa <- merged_hexad
+
+
+hexad_items <- c("A2","A4",
+                 "D3","D4",
+                 "F1","F3",
+                 "P1","P4",
+                 "R2","R4",
+                 "S2","S4")
+
+
+freq <- data_cfa$Freq.Games   
+
+data_cfa$Freq3 <- NA_character_
+data_cfa$Freq3[freq %in% c(1,2)] <- "1-2 days"
+data_cfa$Freq3[freq %in% c(3,4)] <- "3-4 days"
+data_cfa$Freq3[freq %in% c(5,6,7)] <- "5-7 days"
+
+data_cfa$Freq3 <- factor(data_cfa$Freq3,
+                         levels = c("1-2 days","3-4 days","5-7 days"))
+
+table(data_cfa$Freq3, useNA = "ifany")
+
+
+data_mi <- data_cfa[, c("Freq3", hexad_items)]
+data_mi <- data_mi[!is.na(data_mi$Freq3), ]
+data_mi <- data_mi[complete.cases(data_mi[, hexad_items]), ]
+
+# convert items to numeric continuous
+for (v in hexad_items) data_mi[[v]] <- as.numeric(data_mi[[v]])
+
+table(data_mi$Freq3)
+nrow(data_mi)
+
+hexad_model <- '
+  Achiever       =~ A2 + A4
+  Disruptor      =~ D3 + D4
+  FreeSpirit     =~ F1 + F3
+  Philanthropist =~ P1 + P4
+  Player         =~ R2 + R4
+  Socializer     =~ S2 + S4
+'
+
+
+fit_config <- cfa(
+  hexad_model,
+  data      = data_mi,
+  group     = "Freq3",
+  estimator = "MLR"
+)
+
+
+fit_metric <- cfa(
+  hexad_model,
+  data        = data_mi,
+  group       = "Freq3",
+  group.equal = c("loadings"),
+  estimator   = "MLR"
+)
+
+
+fit_scalar <- cfa(
+  hexad_model,
+  data        = data_mi,
+  group       = "Freq3",
+  group.equal = c("loadings","intercepts"),
+  estimator   = "MLR"
+)
+
+
+anova_results <- anova(fit_config, fit_metric, fit_scalar)
+anova_results
+
+
+get_fits <- function(fit) {
+  fitMeasures(fit, c("cfi","rmsea","srmr"))
+}
+
+fit_table <- rbind(
+  config = round(get_fits(fit_config),3),
+  metric = round(get_fits(fit_metric),3),
+  scalar = round(get_fits(fit_scalar),3)
+)
+
+fit_table
+
+
+```
+
+
+### Gender-related patterns in Hexad-12 scores. 
+
+#### Appendix A20. Kruskal–Wallis test for Hexad determinants by Gender
+```{r  b3}
+
+
+library(dplyr)
+
+hexad_vars <- c(
+  "philanthropist",
+  "socializer",
+  "freeSpirit",
+  "achiever",
+  "player",
+  "disruptor"
+)
+
+# 2. Keep rows with non-missing Gender
+data_gender <- merged_hexad[!is.na(merged_hexad$Gender), ]
+
+# Check size
+dim(data_gender)
+
+# 3. Run Kruskal–Wallis for each determinant
+results_list <- lapply(hexad_vars, function(var_name) {
+  
+  # Build temporary dataset
+  df_sub <- data.frame(
+    gender = data_gender$Gender,
+    score  = data_gender[[var_name]]
+  )
+  
+  # Remove missing scores
+  df_sub <- df_sub[!is.na(df_sub$score), ]
+  
+  # Number of gender groups with data
+  n_groups <- length(unique(df_sub$gender))
+  
+  # If fewer than 2 groups, skip test
+  if (n_groups < 2 || nrow(df_sub) == 0) {
+    return(data.frame(
+      Determinant = var_name,
+      n          = nrow(df_sub),
+      n_groups   = n_groups,
+      statistic  = NA_real_,
+      df         = NA_real_,
+      p_value    = NA_real_
+    ))
+  }
+  
+  # Kruskal–Wallis test
+  kt <- kruskal.test(score ~ gender, data = df_sub)
+  
+  data.frame(
+    Determinant = var_name,
+    n           = nrow(df_sub),
+    n_groups    = n_groups,
+    statistic   = round(unname(kt$statistic),2),
+    df          = unname(kt$parameter),
+    p_value     = round(kt$p.value, 3)
+  )
+})
+
+# 4. Combine, clean, adjust p-values
+kw_results <- do.call(rbind, results_list)
+kw_results$p_adj_BH <- p.adjust(kw_results$p_value, method = "BH")
+
+kw_results_tbl <- as_tibble(kw_results[, -7])
+
+
+kable(kw_results_tbl, caption = "Kruskal–Wallis test for Hexad determinants by Gender")
+
+
+```
+#### Multigroup Confirmatory factor Analysis 
+```{r  b4}
+
+data_cfa <- merged_hexad   
+
+
+hexad_items <- c("A2","A4",
+                 "D3","D4",
+                 "F1","F3",
+                 "P1","P4",
+                 "R2","R4",
+                 "S2","S4")
+
+data_cfa$Gender2 <- NA_character_
+
+data_cfa$Gender2[data_cfa$Gender %in% c("female")] <- "Female"
+data_cfa$Gender2[data_cfa$Gender %in% c("male")] <- "Male"
+
+# Factor with correct order
+data_cfa$Gender2 <- factor(data_cfa$Gender2, levels = c("Female","Male"))
+
+
+# Keep only Gender2 + items
+data_mi <- data_cfa[, c("Gender2", hexad_items)]
+
+# Remove rows with missing Gender2
+data_mi <- data_mi[!is.na(data_mi$Gender2), ]
+
+# Remove rows with missing any Hexad item
+data_mi <- data_mi[complete.cases(data_mi[, hexad_items]), ]
+
+# Convert items to numeric continuous
+for (v in hexad_items) {
+  data_mi[[v]] <- as.numeric(data_mi[[v]])
+}
+
+## Check sample size for each group
+table(data_mi$Gender2)
+nrow(data_mi)
+
+hexad_model <- '
+  Achiever       =~ A2 + A4
+  Disruptor      =~ D3 + D4
+  FreeSpirit     =~ F1 + F3
+  Philanthropist =~ P1 + P4
+  Player         =~ R2 + R4
+  Socializer     =~ S2 + S4
+'
+
+
+fit_overall <- cfa(
+  hexad_model,
+  data      = data_mi,
+  estimator = "MLR"
+)
+
+#summary(fit_overall, fit.measures = TRUE, standardized = TRUE)
+
+
+fit_config <- cfa(
+  hexad_model,
+  data      = data_mi,
+  group     = "Gender2",
+  estimator = "MLR"
+)
+
+
+fit_metric <- cfa(
+  hexad_model,
+  data        = data_mi,
+  group       = "Gender2",
+  group.equal = c("loadings"),
+  estimator   = "MLR"
+)
+
+
+fit_scalar <- cfa(
+  hexad_model,
+  data        = data_mi,
+  group       = "Gender2",
+  group.equal = c("loadings","intercepts"),
+  estimator   = "MLR"
+)
+
+
+anova_results <- anova(fit_config, fit_metric, fit_scalar)
+anova_results
+
+
+get_fits <- function(fit) {
+  fitMeasures(fit, c("cfi", "rmsea", "srmr"))
+}
+
+fit_table <- rbind(
+  config = round(get_fits(fit_config),3),
+  metric = round(get_fits(fit_metric),3),
+  scalar = round(get_fits(fit_scalar),3)
+)
+
+fit_table
+
+```
+
+
+### Age-related patterns in Hexad-12 scores. 
+
+#### Appendix A21. Correlations between Hexad determinants and Age
+```{r  b5}
+
+
+# Hexad determinant column names in merged_hexad
+hexad_dets <- c(
+  "philanthropist", "socializer", "freeSpirit",
+  "achiever", "player", "disruptor"
+)
+
+
+merged_hexad_age <- merged_hexad %>%
+  filter(!is.na(Age)) %>%
+  mutate(
+    AgeGroup = case_when(
+      Age >= 18 & Age <= 24 ~ "18–24",
+      Age >= 25 & Age <= 34 ~ "25–34",
+      Age >= 35 & Age <= 49 ~ "35–49",
+      Age >= 50             ~ "50+",
+      TRUE ~ NA_character_
+    ),
+    AgeGroup = factor(AgeGroup, levels = c("18–24", "25–34", "35–49", "50+"))
+  )
+
+
+age_kendall <- hexad_dets %>%
+  map_df(function(det) {
+    x <- merged_hexad_age$Age
+    y <- merged_hexad_age[[det]]
+    idx <- !is.na(x) & !is.na(y)
+
+    kt <- cor.test(
+      x[idx], y[idx],
+      method = "kendall", exact = FALSE
+    )
+
+    tibble(
+      Determinant = det,
+      n          = sum(idx),
+      tau        = round(unname(kt$estimate), 3),
+      p_value    = round(kt$p.value, 3)
+    )
+  }) %>%
+  mutate(
+    p_adj_BH = round(p.adjust(p_value, method = "BH"), 5)
+  )
+
+
+
+kable(age_kendall[,-5], caption = "Correlations between Hexad determinants and Age")
+
+
+```
+
+
+#### Appendix A22. Kruskal–Wallis test for Hexad determinants by Age Group
+```{r}
+
+kw_results <- hexad_dets %>%
+  map_df(function(det) {
+    df_sub <- merged_hexad_age %>%
+      filter(!is.na(AgeGroup), !is.na(.data[[det]]))
+
+    kw <- kruskal.test(df_sub[[det]] ~ df_sub$AgeGroup)
+
+    tibble(
+      Determinant = det,
+      n          = nrow(df_sub),
+      n_groups   = n_distinct(df_sub$AgeGroup),
+      statistic  = round(as.numeric(kw$statistic), 2),
+      df         = as.numeric(kw$parameter),
+      p_value    = round(kw$p.value, 3)
+    )
+  }) %>%
+  mutate(
+    p_adj_BH = round(p.adjust(p_value, method = "BH"), 5)
+  )
+
+
+
+kable(kw_results[,-7], caption = "Kruskal–Wallis test for Hexad determinants by Age Group")
+
+```
+
+#### Dunn post-hoc tests
+```{r}
+
+sig_dets <- kw_results %>%
+  filter(p_adj_BH < 0.05) %>%
+  pull(Determinant)
+
+sig_dets    # determinants that need a Dunn post-hoc test
+
+dunn_results <- sig_dets %>%
+  map_df(function(det) {
+    df_sub <- merged_hexad_age %>%
+      filter(!is.na(AgeGroup), !is.na(.data[[det]]))
+
+    dt <- dunnTest(
+      x      = df_sub[[det]],
+      g      = df_sub$AgeGroup,
+      method = "bh"
+    )
+
+    as_tibble(dt$res) %>%
+      mutate(
+        Determinant = det,
+        Z        = round(Z, 5),
+        P.unadj  = round(P.unadj, 5),
+        P.adj    = round(P.adj, 5),
+        .before = 1
+      )
+  })
+
+dunn_results
+
+
+
+```
+
+
+#### Multigroup Confirmatory factor Analysis 
+```{r  b6}
+
+
+# Items
+hexad_items <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
+
+# 6-factor Hexad-12 model
+hexad_model <- '
+  Achiever       =~ A2 + A4
+  Disruptor      =~ D3 + D4
+  FreeSpirit     =~ F1 + F3
+  Philanthropist =~ P1 + P4
+  Player         =~ R2 + R4
+  Socializer     =~ S2 + S4
+'
+
+merged_hexad_age <- merged_hexad %>%
+  filter(!is.na(Age)) %>%
+  mutate(
+    AgeGroup = case_when(
+      Age >= 18 & Age <= 24 ~ "18–24",
+      Age >= 25 & Age <= 34 ~ "25–34",
+      Age >= 35 & Age <= 49 ~ "35–49",
+      Age >= 50             ~ "50+",
+      TRUE ~ NA_character_
+    ),
+    AgeGroup = factor(AgeGroup, levels = c("18–24","25–34","35–49","50+"))
+  )
+
+table(merged_hexad_age$AgeGroup)  # 18–24, 25–34, 35–49, 50+
+
+
+cfa_age_main <- cfa(
+  model     = hexad_model,
+  data      = merged_hexad_age,
+  estimator = "DWLS",
+  ordered   = hexad_items
+)
+
+
+
+cfa_by_age <- merged_hexad_age %>%
+  split(.$AgeGroup) %>%
+  map(~ cfa(
+    model     = hexad_model,
+    data      = .x,
+    estimator = "DWLS",
+    ordered   = hexad_items
+  ))
+
+# Extract key fit indices by age group
+age_fit_dwls <- map_dfr(names(cfa_by_age), function(g) {
+  fm <- fitMeasures(cfa_by_age[[g]], c("cfi","tli","rmsea","srmr"))
+  tibble(
+    AgeGroup = g,
+    CFI      = round(fm["cfi"],   3),
+    TLI      = round(fm["tli"],   3),
+    RMSEA    = round(fm["rmsea"], 3),
+    SRMR     = round(fm["srmr"], 3)
+  )
+})
+
+#age_fit_dwls
+
+
+run_mi_age <- function(data, group_var = "AgeGroup", model = hexad_model) {
+  df <- data %>%
+    filter(!is.na(.data[[group_var]])) %>%
+    mutate(!!group_var := factor(.data[[group_var]]))
+
+  # Configural
+  fit_config <- cfa(
+    model     = model,
+    data      = df,
+    group     = group_var,
+    estimator = "MLR"
+  )
+
+  # Metric (equal loadings)
+  fit_metric <- cfa(
+    model       = model,
+    data        = df,
+    group       = group_var,
+    estimator   = "MLR",
+    group.equal = c("loadings")
+  )
+
+  # Scalar (equal loadings + intercepts)
+  fit_scalar <- cfa(
+    model       = model,
+    data        = df,
+    group       = group_var,
+    estimator   = "MLR",
+    group.equal = c("loadings","intercepts")
+  )
+
+  # Scaled chi-square difference test
+  mi_table_raw <- lavTestLRT(fit_config, fit_metric, fit_scalar)
+
+  # Round p-values to 5 decimals
+  mi_table <- as.data.frame(mi_table_raw) %>%
+    mutate(
+      Chisq      = round(Chisq,      3),
+      `Chisq diff` = round(`Chisq diff`, 3),
+      `Pr(>Chisq)` = round(`Pr(>Chisq)`, 5)
+    )
+
+  # Fit indices for each level
+  fit_table_raw <- rbind(
+    config = fitMeasures(fit_config, c("cfi","rmsea","srmr")),
+    metric = fitMeasures(fit_metric, c("cfi","rmsea","srmr")),
+    scalar = fitMeasures(fit_scalar, c("cfi","rmsea","srmr"))
+  )
+
+  fit_table <- as.data.frame(fit_table_raw) %>%
+    rownames_to_column("Model") %>%
+    mutate(
+      cfi   = round(cfi,   3),
+      rmsea = round(rmsea, 3),
+      srmr  = round(srmr,  3)
+    )
+
+  # Delta CFI (metric vs configural, scalar vs metric)
+  delta_cfi <- tibble(
+    Comparison = c("metric - config", "scalar - metric"),
+    Delta_CFI  = c(
+      fit_table_raw["metric","cfi"] - fit_table_raw["config","cfi"],
+      fit_table_raw["scalar","cfi"] - fit_table_raw["metric","cfi"]
+    ) %>% round(3)
+  )
+
+  list(
+    config    = fit_config,
+    metric    = fit_metric,
+    scalar    = fit_scalar,
+    mi_table  = mi_table,
+    fit_table = fit_table,
+    delta_cfi = delta_cfi
+  )
+}
+
+
+mi_age <- run_mi_age(merged_hexad_age, group_var = "AgeGroup")
+
+mi_age$mi_table      # LRT with rounded p-values
+mi_age$fit_table     # CFI / RMSEA / SRMR by model
+#mi_age$delta_cfi     # ΔCFI diagnostics
+
+
+```
+
+## Country-related patterns in Hexad-12 scores. 
+
+#### Appendix A23. Kruskal–Wallis test for Hexad determinants by top 10 countries
+```{r}
+
+# Hexad determinants
+hexad_dets <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+kw_country_results <- hexad_dets %>%
+  map_df(function(det) {
+    df_sub <- hexad_top10 %>%
+      filter(!is.na(Country), !is.na(.data[[det]]))
+
+    kw <- kruskal.test(df_sub[[det]] ~ df_sub$Country)
+
+    tibble(
+      Determinant = det,
+      n           = nrow(df_sub),
+      n_groups    = n_distinct(df_sub$Country),
+      statistic   = round(as.numeric(kw$statistic), 2),
+      df          = as.numeric(kw$parameter),
+      p_value     = kw$p.value
+    )
+  }) %>%
+  mutate(
+    p_value   = round(p_value, 3),
+    p_adj_BH  = round(p.adjust(p_value, method = "BH"), 5)
+  )
+
+
+
+kable(kw_country_results[,-7], caption = "Kruskal–Wallis test for Hexad determinants by Age Group")
+
+```
+
+
+#### Multigroup Confirmatory factor Analysis 
+```{r}
+
+
+items <- c("P1","P4","S2","S4","A2","A4","R2","R4","F1","F3","D3","D4")
+
+
+normalize_country <- function(x) {
+  x <- stringr::str_trim(as.character(x))
+  x <- ifelse(x == "", NA_character_, x)
+  # strip qualifiers in parentheses
+  x <- sub("\\s*\\(.*\\)$", "", x)
+  # standardize a few variants
+  dplyr::case_when(
+    x %in% c("Perú","Peru") ~ "Perú",
+    x == "Estados Unidos de América" ~ "Estados Unidos",
+    TRUE ~ x
+  )
+}
+
+data <- merged_hexad %>%
+  dplyr::mutate(Country = normalize_country(Country))
+
+
+# Map to 3 regions
+data <- data %>%
+  dplyr::mutate(
+    Region3 = dplyr::case_when(
+      Country %in% c("Guatemala","Honduras","El Salvador",
+                     "Nicaragua") ~ "Central_America_Mex_Caribbean",
+      
+      Country %in% c("Venezuela","Colombia") ~ "Northern_Andean",
+      
+      Country %in% c("Argentina","Ecuador","Perú","Bolivia") ~ "Southern_Cone",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  dplyr::filter(!is.na(Region3))
+
+data$Region3 <- factor(data$Region3)
+
+cat("\nCounts per Region3:\n"); print(table(data$Region3))
+
+data <- data %>% filter(if_all(all_of(items), ~ !is.na(.x)))
+data[items] <- lapply(data[items], function(x) as.numeric(as.character(x)))
+
+
+cfa_model <- '
+Philanthropist =~ P1 + P4
+Socializer     =~ S2 + S4
+Achiever       =~ A2 + A4
+Player         =~ R2 + R4
+FreeSpirit     =~ F1 + F3
+Disruptor      =~ D3 + D4
+'
+
+
+# A. Configural Invariance (Baseline)
+fit_config <- cfa(
+  model = cfa_model,
+  data = data,
+  group = "Region3",
+  estimator = "MLR"
+)
+
+# B. Metric Invariance (Constrain Loadings)
+fit_metric <- cfa(
+  model = cfa_model,
+  data = data,
+  group = "Region3",
+  estimator = "MLR",
+  group.equal = c("loadings")
+)
+
+# C. Scalar Invariance (Constrain Loadings + Intercepts)
+fit_scalar <- cfa(
+  model = cfa_model,
+  data = data,
+  group = "Region3",
+  estimator = "MLR",
+  group.equal = c("loadings", "intercepts")
+)
+
+
+# Likelihood Ratio Test (Scaled Chi-square difference)
+anova_res <- anova(fit_config, fit_metric, fit_scalar)
+print(anova_res)
+
+# Extract Fit Indices
+get_fits <- function(fit) {
+  fitMeasures(fit, c("cfi.robust", "rmsea.robust", "srmr"))
+}
+
+fit_table <- rbind(
+  config = get_fits(fit_config),
+  metric = get_fits(fit_metric),
+  scalar = get_fits(fit_scalar)
+)
+
+# Rename for clarity
+colnames(fit_table) <- c("CFI", "RMSEA", "SRMR")
+
+cat("\nFit Indices (Robust):\n")
+print(round(fit_table, 3))
+
+
+
 ```
