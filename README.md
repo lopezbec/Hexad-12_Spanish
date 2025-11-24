@@ -1,31 +1,7 @@
 README
 ================
 
-``` r
-knitr::opts_chunk$set(echo = TRUE,warning = FALSE, message = FALSE)
-```
-
 Download that from GitHub Repo: <https://github.com/>
-
-``` r
-# Define the GitHub raw CSV URL
-#github_url <- "https://raw.githubusercontent.com//Hexad-/refs/heads/main/Hexad_12_Spanish_data.csv"
-
-# Define a local file path to save the downloaded file
-#local_file <- tempfile(fileext = ".csv")
-
-# Download the file
-#download.file(github_url, local_file)
-
-# Load the CSV into a data frame
-#data <- read.csv(local_file,row.names = 1)
-data<-read.csv("Hexad_12_Spanish_data.csv")
-#remove 1st non-value columns
-
-
-# Display the first few rows of the data frame
-head(data)
-```
 
     ##    X philanthropist socializer freeSpirit achiever player disruptor A2 A4 D3 D4
     ## 1  4             14         14         13       14      7         7  7  7  6  1
@@ -56,40 +32,17 @@ head(data)
     ## 5          7
     ## 6         NA
 
-## General Statistics
+# 4. Results
 
-#### Number of Participants
+## 4.2. Sample descriptives
+
+### Number of Participants
 
 Each row represents a data point from a single participant. Total number of participants
 
-``` r
-print(nrow(data))
-```
-
     ## [1] 866
 
-#### Completion Time
-
-``` r
-# Ensure Completion.Time is numeric
-data$Completion.Time <- as.numeric(data$Completion.Time)
-
-# Compute and create summary table
-summary_table <- data.frame(
-  Statistic = c("Average", "Median", "Min", "Max", "Standard Deviation", "Non-Empty Rows"),
-  Value = c(
-   round(mean(data$Completion.Time, na.rm = TRUE),2),
-    round(median(data$Completion.Time, na.rm = TRUE),2),
-    round(min(data$Completion.Time, na.rm = TRUE),2),
-    round(max(data$Completion.Time, na.rm = TRUE),2),
-    round(sd(data$Completion.Time, na.rm = TRUE),2),
-    round(sum(!is.na(data$Completion.Time)),0)
-  )
-)
-
-# Display the table
-kable(summary_table, caption = "Summary Statistics for Completion Time")
-```
+### Completion Time Summary statistics
 
 | Statistic          |  Value |
 |:-------------------|-------:|
@@ -102,28 +55,7 @@ kable(summary_table, caption = "Summary Statistics for Completion Time")
 
 Summary Statistics for Completion Time
 
-#### Age
-
-``` r
-# Ensure Completion.Time is numeric
-data$Age <- as.numeric(data$Age)
-
-# Compute and create summary table
-summary_table <- data.frame(
-  Statistic = c("Average", "Median", "Min", "Max", "Standard Deviation", "Non-Empty Rows"),
-  Value = c(
-   round(mean(data$Age, na.rm = TRUE),2),
-    round(median(data$Age, na.rm = TRUE),2),
-    round(min(data$Age, na.rm = TRUE),2),
-    round(max(data$Age, na.rm = TRUE),2),
-    round(sd(data$Age, na.rm = TRUE),2),
-    round(sum(!is.na(data$Age)),0)
-  )
-)
-
-# Display the table
-kable(summary_table, caption = "Summary Statistics for Age")
-```
+### Age Summary statistics
 
 | Statistic          |  Value |
 |:-------------------|-------:|
@@ -136,28 +68,7 @@ kable(summary_table, caption = "Summary Statistics for Age")
 
 Summary Statistics for Age
 
-#### Gender
-
-``` r
-# Encode Gender as a factor with specific levels
-gender_labels <- c("female", "male", "other")
-data$Gender <- factor(data$Gender, levels = gender_labels)
-
-# Compute summary statistics for Gender
-gender_counts <- table(data$Gender)
-total_count <- sum(gender_counts)
-gender_percentages <- round((gender_counts / total_count) * 100, 2)
-
-# Create a summary table
-gender_summary_table <- data.frame(
-  Gender = c(names(gender_counts), "Total"),
-  Count = c(as.numeric(gender_counts), total_count),
-  Percentage = c(paste0(gender_percentages, "%"), "100%")
-)
-
-# Display the table
-kable(gender_summary_table, caption = "Summary of Gender Distribution with Totals")
-```
+### Gender Summary statistics
 
 | Gender | Count | Percentage |
 |:-------|------:|:-----------|
@@ -168,37 +79,7 @@ kable(gender_summary_table, caption = "Summary of Gender Distribution with Total
 
 Summary of Gender Distribution with Totals
 
-#### Education Level
-
-``` r
-# Encode Education Level as a factor with specific levels
-educationlevel_labels <- c(
-  "High School diploma",
-  "Technical or vocational training",
-  "Associate's degree",
-  "Bachelor's degree",
-  "Master's degree",
-  "Professional degree",
-  "Doctorate"
-)
-
-data$Education <- factor(data$Education, levels = educationlevel_labels)
-
-# Compute counts and percentages
-education_counts <- table(data$Education)
-total_count <- sum(education_counts)
-education_percentages <- round((education_counts / total_count) * 100, 2)
-
-# Create a summary table
-education_summary_table <- data.frame(
-  EducationLevel = c(names(education_counts), "Total"),
-  Count = c(as.numeric(education_counts), total_count),
-  Percentage = c(paste0(education_percentages, "%"), "100%")
-)
-
-# Display the summary table
-kable(education_summary_table, caption = "Summary of Education Level Distribution with Totals")
-```
+### Education Level Summary statistics
 
 | EducationLevel                   | Count | Percentage |
 |:---------------------------------|------:|:-----------|
@@ -213,28 +94,7 @@ kable(education_summary_table, caption = "Summary of Education Level Distributio
 
 Summary of Education Level Distribution with Totals
 
-#### Playing Days
-
-``` r
-# Ensure Completion.Time is numeric
-data$Freq.Games <- as.numeric(data$Freq.Games)
-
-# Compute and create summary table
-summary_table <- data.frame(
-  Statistic = c("Average", "Median", "Min", "Max", "Standard Deviation", "Non-Empty Rows"),
-  Value = c(
-   round(mean(data$Freq.Games, na.rm = TRUE),2),
-    round(median(data$Freq.Games, na.rm = TRUE),2),
-    round(min(data$Freq.Games, na.rm = TRUE),2),
-    round(max(data$Freq.Games, na.rm = TRUE),2),
-    round(sd(data$Freq.Games, na.rm = TRUE),2),
-    round(sum(!is.na(data$Freq.Games)),0)
-  )
-)
-
-# Display the table
-kable(summary_table, caption = "Summary Statistics for Frequency of Play")
-```
+### Game frequency Summary statistics
 
 | Statistic          |  Value |
 |:-------------------|-------:|
@@ -247,27 +107,7 @@ kable(summary_table, caption = "Summary Statistics for Frequency of Play")
 
 Summary Statistics for Frequency of Play
 
-#### Country of Origin
-
-``` r
-# Filter the data to exclude empty Country values
-filtered_data <- data$Country[data$Country != ""]
-
-# Compute counts and percentages
-country_counts <- sort(table(filtered_data), decreasing = TRUE)
-total_count <- sum(country_counts)
-country_percentages <- round((country_counts / total_count) * 100, 2)
-
-# Create a summary table with "Total" as the first row
-summary_table <- data.frame(
-  Country = c("Total", names(country_counts)),
-  Count = c(total_count, as.numeric(country_counts)),
-  Percentage = c("100%", paste0(country_percentages, "%"))
-)
-
-# Display the summary table
-kable(summary_table, caption = "Summary of Country Distribution with Totals at the Top")
-```
+### Country of Origin Summary statistics
 
 | Country                              | Count | Percentage |
 |:-------------------------------------|------:|:-----------|
@@ -282,193 +122,71 @@ kable(summary_table, caption = "Summary of Country Distribution with Totals at t
 | Guatemala                            |    15 | 2.13%      |
 | Perú                                 |     9 | 1.28%      |
 | Ecuador                              |     8 | 1.14%      |
-| Uruguay                              |     7 | 0.99%      |
-| Chile                                |     6 | 0.85%      |
-| República Dominicana                 |     5 | 0.71%      |
-| México                               |     4 | 0.57%      |
-| Paraguay                             |     4 | 0.57%      |
-| Costa Rica                           |     2 | 0.28%      |
-| Afganistán                           |     1 | 0.14%      |
-| Argelia                              |     1 | 0.14%      |
-| Australia                            |     1 | 0.14%      |
-| Belice                               |     1 | 0.14%      |
-| Brasil                               |     1 | 0.14%      |
-| España                               |     1 | 0.14%      |
-| Estados Unidos de América            |     1 | 0.14%      |
 
 Summary of Country Distribution with Totals at the Top
 
-#### Hexad type Distribution
+### Hexad determinants Summary statistics
 
-``` r
-# Subset data to include the first six columns
-subdata <- data[, c(1:6)]
+#### Table 3. Summary Statistics of Hexad-12 determinants (N = 866)
 
-# Specify the columns of interest
-columns_of_interest <- c("Philanthropist", "Socializer", "Free Spirit", "Achiever", "Player", "Disruptor")
-
-# Rename columns
-colnames(subdata) <- columns_of_interest
-
-# Calculate summary statistics and round to 2 decimal places
-summary_stats <- data.frame(
-  Column   = columns_of_interest,
-  Mean     = round(sapply(subdata[columns_of_interest], mean,      na.rm = TRUE), 2),
-  Median   = round(sapply(subdata[columns_of_interest], median,    na.rm = TRUE), 2),
-  Min      = round(sapply(subdata[columns_of_interest], min,       na.rm = TRUE), 2),
-  Max      = round(sapply(subdata[columns_of_interest], max,       na.rm = TRUE), 2),
-  SD       = round(sapply(subdata[columns_of_interest], sd,        na.rm = TRUE), 2),
-  Skewness = round(sapply(subdata[columns_of_interest], skewness,  na.rm = TRUE), 2),
-  Kurtosis = round(sapply(subdata[columns_of_interest], kurtosis,  na.rm = TRUE), 2)
-)
-
-# Sort by descending Mean
-summary_stats <- summary_stats[order(-summary_stats$Mean), ]
-
-# Print the table nicely with knitr::kable
-kable(summary_stats, 
-      caption = "Summary Statistics of Hexad-12 determinants", 
-      digits  = 2)
-```
-
-|                | Column         |   Mean | Median | Min |  Max |     SD | Skewness | Kurtosis |
-|:---------------|:---------------|-------:|-------:|----:|-----:|-------:|---------:|---------:|
-| Philanthropist | Philanthropist | 804.61 |  804.5 |   4 | 1676 | 467.24 |     0.07 |     1.87 |
-| Achiever       | Achiever       |  12.76 |   14.0 |   2 |   14 |   2.06 |    -2.36 |     9.43 |
-| Player         | Player         |  12.72 |   13.0 |   2 |   14 |   1.71 |    -2.11 |     9.88 |
-| Socializer     | Socializer     |  12.38 |   13.0 |   2 |   14 |   2.33 |    -2.04 |     7.64 |
-| Disruptor      | Disruptor      |  11.84 |   13.0 |   2 |   14 |   2.54 |    -1.46 |     5.00 |
-| Free Spirit    | Free Spirit    |  10.96 |   12.0 |   2 |   14 |   3.10 |    -1.05 |     3.49 |
+|                | Column         |  Mean | Median | Min | Max |   SD | Skewness | Kurtosis |
+|:---------------|:---------------|------:|-------:|----:|----:|-----:|---------:|---------:|
+| Free Spirit    | Free Spirit    | 12.76 |     14 |   2 |  14 | 2.06 |    -2.36 |     9.43 |
+| Achiever       | Achiever       | 12.72 |     13 |   2 |  14 | 1.71 |    -2.11 |     9.88 |
+| Philanthropist | Philanthropist | 12.38 |     13 |   2 |  14 | 2.33 |    -2.04 |     7.64 |
+| Player         | Player         | 11.84 |     13 |   2 |  14 | 2.54 |    -1.46 |     5.00 |
+| Socializer     | Socializer     | 10.96 |     12 |   2 |  14 | 3.10 |    -1.05 |     3.49 |
+| Disruptor      | Disruptor      |  7.98 |      8 |   2 |  14 | 3.78 |    -0.14 |     1.90 |
 
 Summary Statistics of Hexad-12 determinants
 
-``` r
-library(tidyverse)
-library(gghalves)
-library(dplyr)
-# ---- reshape to long form ---------------------------------------------------
-hexad_long <- data %>% 
-  dplyr::select(
-    Philanthropist = 'philanthropist',
-    Socializer     = 'socializer',
-    `Free Spirit`  = 'freeSpirit',
-    Achiever       = 'achiever',
-    Player         = 'player',
-    Disruptor      = 'disruptor'
-  ) %>% 
-  pivot_longer(
-    cols      = everything(),
-    names_to  = "Determinant",
-    values_to = "Score"
-  ) %>% 
-  mutate(
-    Determinant = fct_reorder(Determinant, Score, .fun = mean, .desc = TRUE)
-  )
-
-# ---- full violin + slim boxplot + jittered points --------------------------
-ggplot(hexad_long, aes(x = Determinant, y = Score, fill = Determinant)) +
-  # wider violin
-  geom_violin(trim = FALSE, width = 1.0, alpha = 0.6) +
-  # ultra-thin box in the center
-  geom_boxplot(width = 0.08, fill = "white", outlier.shape = NA) +
-  # jittered raw points
-  geom_jitter(aes(color = Determinant+1),
-              width = 0.1, height = 0.1,
-              size = 1, alpha = 0.2,
-              show.legend = FALSE) +
-  scale_y_continuous(limits = c(1, 14), breaks = seq(2, 14, 2)) +
-  guides(fill = FALSE) +
-  labs(
-    title = "Distribution of Hexad Motivational Determinants",
-    x     = NULL,
-    y     = "Score (0–14)"
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(panel.grid.major.x = element_blank())
-```
+#### Figure 2: Violin plot of Hexad determinant distributions
 
 ![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
-## Hexad Player type Distributions Analysis By Country (top 10)
+### Summary statistics for all Hexad-12 determinants across key subgroups
 
-#### Distribution by Country (Top 10)
+#### Appendix A3. Distribution of Hexad determinants by Education
 
-``` r
-#Shorten Countries Name for easy of tables
-data[data$Country=="Bolivia (Estado Plurinacional de)", 'Country' ]<-"Bolivia"
-data[data$Country=="Venezuela (República Bolivariana de)", 'Country' ]<-"Venezuela"
-data[data$Country==" Estados Unidos de América", 'Country' ]<-"USA"
-data$Country<-as.factor(data$Country)
+| Measure | High School diploma | Technical or vocational training | Associate’s degree | Bachelor’s degree | Master’s degree | Professional degree | Doctorate |
+|:---|---:|---:|---:|---:|---:|---:|---:|
+| N | 307.00 | 117.00 | 13.00 | 168.00 | 20.00 | 78.00 | 3.00 |
+| philanthropist_Mean | 12.46 | 12.47 | 12.00 | 12.20 | 12.60 | 12.67 | 12.33 |
+| philanthropist_Median | 13.00 | 13.00 | 12.00 | 13.00 | 13.00 | 14.00 | 13.00 |
+| philanthropist_Min | 2.00 | 2.00 | 8.00 | 2.00 | 7.00 | 6.00 | 10.00 |
+| philanthropist_Max | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 |
+| philanthropist_SD | 2.11 | 2.05 | 2.20 | 2.44 | 1.85 | 1.84 | 2.08 |
+| socializer_Mean | 10.84 | 10.95 | 11.08 | 11.26 | 11.75 | 11.56 | 11.33 |
+| socializer_Median | 12.00 | 12.00 | 12.00 | 12.00 | 12.00 | 12.00 | 14.00 |
+| socializer_Min | 2.00 | 2.00 | 4.00 | 2.00 | 7.00 | 4.00 | 6.00 |
+| socializer_Max | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 |
+| socializer_SD | 3.09 | 2.87 | 2.99 | 2.91 | 2.29 | 2.60 | 4.62 |
+| freeSpirit_Mean | 12.91 | 13.13 | 12.85 | 12.77 | 12.20 | 13.09 | 12.67 |
+| freeSpirit_Median | 14.00 | 14.00 | 13.00 | 14.00 | 13.50 | 14.00 | 12.00 |
+| freeSpirit_Min | 3.00 | 4.00 | 9.00 | 2.00 | 2.00 | 7.00 | 12.00 |
+| freeSpirit_Max | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 |
+| freeSpirit_SD | 1.79 | 1.51 | 1.63 | 2.17 | 2.84 | 1.53 | 1.15 |
+| achiever_Mean | 12.68 | 12.73 | 12.23 | 12.72 | 12.80 | 12.95 | 12.33 |
+| achiever_Median | 13.00 | 13.00 | 13.00 | 13.00 | 13.00 | 14.00 | 13.00 |
+| achiever_Min | 6.00 | 3.00 | 10.00 | 2.00 | 10.00 | 7.00 | 10.00 |
+| achiever_Max | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 |
+| achiever_SD | 1.58 | 1.83 | 1.48 | 1.76 | 1.32 | 1.52 | 2.08 |
+| player_Mean | 12.07 | 12.04 | 11.00 | 11.86 | 12.10 | 11.74 | 9.00 |
+| player_Median | 13.00 | 13.00 | 11.00 | 13.00 | 13.00 | 12.00 | 11.00 |
+| player_Min | 2.00 | 2.00 | 6.00 | 4.00 | 7.00 | 2.00 | 5.00 |
+| player_Max | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 11.00 |
+| player_SD | 2.40 | 2.32 | 2.52 | 2.43 | 2.38 | 2.83 | 3.46 |
+| disruptor_Mean | 8.30 | 8.11 | 8.31 | 7.40 | 8.15 | 8.05 | 4.67 |
+| disruptor_Median | 9.00 | 8.00 | 9.00 | 7.00 | 9.00 | 8.00 | 4.00 |
+| disruptor_Min | 2.00 | 2.00 | 2.00 | 2.00 | 2.00 | 2.00 | 4.00 |
+| disruptor_Max | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 14.00 | 6.00 |
+| disruptor_SD | 3.70 | 3.75 | 3.61 | 3.60 | 3.70 | 3.86 | 1.15 |
 
-# Filter out rows where 'Country' is missing
-hexad_data_clean <- data %>% filter(Country != "")
+Distribution of Hexad determinants by Education
 
-# Identify the top 5, top 10, and top 20 most common countries
-top_countries <- hexad_data_clean %>%
-  count(Country, sort = TRUE)
+#### Appendix A4. Distribution of Hexad items by Country
 
-top_10_countries <- top_countries %>% slice(1:10) %>% pull(Country)
-
-# Filter data for these top countries
-hexad_top10 <- hexad_data_clean %>% filter(Country %in% top_10_countries)
-```
-
-``` r
-# Calculate and round summary statistics by Country for each player type
-hexad_summary <- hexad_top10 %>%
-  group_by(Country) %>%
-  summarise(
-    sample_size = n(),
-    philanthropist_mean = round(mean(philanthropist, na.rm = TRUE), 2),
-    philanthropist_median = round(median(philanthropist, na.rm = TRUE), 2),
-    philanthropist_min = round(min(philanthropist, na.rm = TRUE), 2),
-    philanthropist_max = round(max(philanthropist, na.rm = TRUE), 2),
-    philanthropist_sd = round(sd(philanthropist, na.rm = TRUE), 2),
-    
-    socializer_mean = round(mean(socializer, na.rm = TRUE), 2),
-    socializer_median = round(median(socializer, na.rm = TRUE), 2),
-    socializer_min = round(min(socializer, na.rm = TRUE), 2),
-    socializer_max = round(max(socializer, na.rm = TRUE), 2),
-    socializer_sd = round(sd(socializer, na.rm = TRUE), 2),
-    
-    freeSpirit_mean = round(mean(freeSpirit, na.rm = TRUE), 2),
-    freeSpirit_median = round(median(freeSpirit, na.rm = TRUE), 2),
-    freeSpirit_min = round(min(freeSpirit, na.rm = TRUE), 2),
-    freeSpirit_max = round(max(freeSpirit, na.rm = TRUE), 2),
-    freeSpirit_sd = round(sd(freeSpirit, na.rm = TRUE), 2),
-    
-    achiever_mean = round(mean(achiever, na.rm = TRUE), 2),
-    achiever_median = round(median(achiever, na.rm = TRUE), 2),
-    achiever_min = round(min(achiever, na.rm = TRUE), 2),
-    achiever_max = round(max(achiever, na.rm = TRUE), 2),
-    achiever_sd = round(sd(achiever, na.rm = TRUE), 2),
-    
-    player_mean = round(mean(player, na.rm = TRUE), 2),
-    player_median = round(median(player, na.rm = TRUE), 2),
-    player_min = round(min(player, na.rm = TRUE), 2),
-    player_max = round(max(player, na.rm = TRUE), 2),
-    player_sd = round(sd(player, na.rm = TRUE), 2),
-    
-    disruptor_mean = round(mean(disruptor, na.rm = TRUE), 2),
-    disruptor_median = round(median(disruptor, na.rm = TRUE), 2),
-    disruptor_min = round(min(disruptor, na.rm = TRUE), 2),
-    disruptor_max = round(max(disruptor, na.rm = TRUE), 2),
-    disruptor_sd = round(sd(disruptor, na.rm = TRUE), 2)
-  ) %>%
-  arrange(desc(sample_size)) # Sort by sample size
-
-# Transpose the table
-hexad_summary_t <- hexad_summary %>%
-  pivot_longer(cols = -Country, names_to = "Statistic", values_to = "Value") %>%
-  pivot_wider(names_from = Country, values_from = Value)
-
-# Generate an RMarkdown table
-hexad_summary_t %>%
-  kbl(caption = "Transposed Summary Statistics for Hexad Player Types by Country") %>%
-  kable_styling(full_width = TRUE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
-
-<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<table class="table table-striped table-hover table-condensed table-responsive" style="color: black; margin-left: auto; margin-right: auto;">
 
 <caption>
 
@@ -2373,1586 +2091,123 @@ disruptor_sd
 
 </table>
 
-#### Normality tests
-
-``` r
-# Initialize an empty data frame to store the results
-shapiro_results <- data.frame(
-  Row = c("Philanthropist", "Socializer", "Free Spirit", "Achiever", "Player", "Disruptor"),
-  Shapiro_Wilk = numeric(6),
-  P_value = numeric(6),
-  stringsAsFactors = FALSE
-)
-
-# List of player types
-player_types <- c("philanthropist", "socializer", "freeSpirit", "achiever", "player", "disruptor")
-
-# Loop through each player type and perform the Shapiro-Wilk test
-for (i in seq_along(player_types)) {
-  type <- player_types[i]
-  
-  # Perform ANOVA to get residuals
-  anova_5 <- aov(as.formula(paste(type, "~ Country")), data = hexad_top10)
-  
-  # Perform Shapiro-Wilk Test
-  shapiro_test <- shapiro.test(residuals(anova_5))
-  
-  # Save results
-  shapiro_results$Shapiro_Wilk[i] <- round(shapiro_test$statistic, 2)
-  shapiro_results$P_value[i] <- shapiro_test$p.value
-}
-
-# Rename columns to match desired output
-colnames(shapiro_results) <- c("Row", "Shapiro-Wilk", "p-value")
-
-# Create and display the RMarkdown table
-shapiro_results %>%
-  kbl(caption = "Shapiro-Wilk Normality Test for Player Types by Country") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
-
-<table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
-
-<caption>
-
-Shapiro-Wilk Normality Test for Player Types by Country
-</caption>
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;">
-
-Row
-</th>
-
-<th style="text-align:right;">
-
-Shapiro-Wilk
-</th>
-
-<th style="text-align:right;">
-
-p-value
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-Philanthropist
-</td>
-
-<td style="text-align:right;">
-
-0.81
-</td>
-
-<td style="text-align:right;">
-
-0
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Socializer
-</td>
-
-<td style="text-align:right;">
-
-0.90
-</td>
-
-<td style="text-align:right;">
-
-0
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Free Spirit
-</td>
-
-<td style="text-align:right;">
-
-0.70
-</td>
-
-<td style="text-align:right;">
-
-0
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Achiever
-</td>
-
-<td style="text-align:right;">
-
-0.81
-</td>
-
-<td style="text-align:right;">
-
-0
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Player
-</td>
-
-<td style="text-align:right;">
-
-0.85
-</td>
-
-<td style="text-align:right;">
-
-0
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Disruptor
-</td>
-
-<td style="text-align:right;">
-
-0.96
-</td>
-
-<td style="text-align:right;">
-
-0
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-#### Non-parametric ANOVA tests
-
-``` r
-# Initialize an empty data frame to store the results
-results <- data.frame(
-  Row = c("Philanthropist", "Socializer", "Free Spirit", "Achiever", "Player", "Disruptor"),
-  Kruskal_Wallis_Chi_Sq = numeric(6),
-  Degrees_of_Freedom = numeric(6),
-  p_value = numeric(6),
-  stringsAsFactors = FALSE
-)
-
-# List of player types
-player_types <- c("philanthropist", "socializer", "freeSpirit", "achiever", "player", "disruptor")
-
-# Loop through each player type and perform the Kruskal-Wallis test
-for (i in seq_along(player_types)) {
-  type <- player_types[i]
-  
-  # Perform Kruskal-Wallis Test
-  kw_test <- kruskal.test(as.formula(paste(type, "~ Country")), data = hexad_top10)
-  
-  # Save results
-  results$Kruskal_Wallis_Chi_Sq[i] <- round(kw_test$statistic, 2)
-  results$Degrees_of_Freedom[i] <- kw_test$parameter
-  results$p_value[i] <- round(kw_test$p.value, 3)
-}
-
-# Rename columns to match desired output
-colnames(results) <- c(
-  "Row",
-  "Kruskal-Wallis χ^2",
-  "Degrees of Freedom",
-  "p-value"
-)
-
-# Create and display the RMarkdown table
-results %>%
-  kbl(caption = "Kruskal-Wallis Test Results for Player Types by Country") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
-
-<table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
-
-<caption>
-
-Kruskal-Wallis Test Results for Player Types by Country
-</caption>
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;">
-
-Row
-</th>
-
-<th style="text-align:right;">
-
-Kruskal-Wallis χ^2
-</th>
-
-<th style="text-align:right;">
-
-Degrees of Freedom
-</th>
-
-<th style="text-align:right;">
-
-p-value
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-Philanthropist
-</td>
-
-<td style="text-align:right;">
-
-16.17
-</td>
-
-<td style="text-align:right;">
-
-9
-</td>
-
-<td style="text-align:right;">
-
-0.063
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Socializer
-</td>
-
-<td style="text-align:right;">
-
-15.83
-</td>
-
-<td style="text-align:right;">
-
-9
-</td>
-
-<td style="text-align:right;">
-
-0.070
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Free Spirit
-</td>
-
-<td style="text-align:right;">
-
-6.53
-</td>
-
-<td style="text-align:right;">
-
-9
-</td>
-
-<td style="text-align:right;">
-
-0.686
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Achiever
-</td>
-
-<td style="text-align:right;">
-
-21.76
-</td>
-
-<td style="text-align:right;">
-
-9
-</td>
-
-<td style="text-align:right;">
-
-0.010
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Player
-</td>
-
-<td style="text-align:right;">
-
-13.42
-</td>
-
-<td style="text-align:right;">
-
-9
-</td>
-
-<td style="text-align:right;">
-
-0.145
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Disruptor
-</td>
-
-<td style="text-align:right;">
-
-11.68
-</td>
-
-<td style="text-align:right;">
-
-9
-</td>
-
-<td style="text-align:right;">
-
-0.232
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-#### Dunn test for multiple comparison for Achiever
-
-``` r
-# Perform Dunn Test with Bonferroni adjustment
-posthoc_test <- dunnTest(achiever ~ Country, data = hexad_top10, method = "bonferroni")
-
-# Extract and round results
-posthoc_results <- posthoc_test$res %>%
-  mutate(across(where(is.numeric), ~ round(.x, 3))) # Round all numeric columns to 3 decimal places
-
-# Format results as a nice RMarkdown table
-posthoc_results %>%
-  kbl(caption = "Post Hoc Dunn Test Results for Achiever by Country (Bonferroni Adjustment)") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
-
-<table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
-
-<caption>
-
-Post Hoc Dunn Test Results for Achiever by Country (Bonferroni Adjustment)
-</caption>
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;">
-
-Comparison
-</th>
-
-<th style="text-align:right;">
-
-Z
-</th>
-
-<th style="text-align:right;">
-
-P.unadj
-</th>
-
-<th style="text-align:right;">
-
-P.adj
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - Bolivia
-</td>
-
-<td style="text-align:right;">
-
-0.374
-</td>
-
-<td style="text-align:right;">
-
-0.708
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - Colombia
-</td>
-
-<td style="text-align:right;">
-
--2.775
-</td>
-
-<td style="text-align:right;">
-
-0.006
-</td>
-
-<td style="text-align:right;">
-
-0.248
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Bolivia - Colombia
-</td>
-
-<td style="text-align:right;">
-
--3.047
-</td>
-
-<td style="text-align:right;">
-
-0.002
-</td>
-
-<td style="text-align:right;">
-
-0.104
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - Ecuador
-</td>
-
-<td style="text-align:right;">
-
--0.936
-</td>
-
-<td style="text-align:right;">
-
-0.349
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Bolivia - Ecuador
-</td>
-
-<td style="text-align:right;">
-
--1.068
-</td>
-
-<td style="text-align:right;">
-
-0.286
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Colombia - Ecuador
-</td>
-
-<td style="text-align:right;">
-
-0.304
-</td>
-
-<td style="text-align:right;">
-
-0.761
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - El Salvador
-</td>
-
-<td style="text-align:right;">
-
--1.472
-</td>
-
-<td style="text-align:right;">
-
-0.141
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Bolivia - El Salvador
-</td>
-
-<td style="text-align:right;">
-
--1.672
-</td>
-
-<td style="text-align:right;">
-
-0.095
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Colombia - El Salvador
-</td>
-
-<td style="text-align:right;">
-
-0.423
-</td>
-
-<td style="text-align:right;">
-
-0.672
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Ecuador - El Salvador
-</td>
-
-<td style="text-align:right;">
-
--0.015
-</td>
-
-<td style="text-align:right;">
-
-0.988
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - Guatemala
-</td>
-
-<td style="text-align:right;">
-
-0.385
-</td>
-
-<td style="text-align:right;">
-
-0.700
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Bolivia - Guatemala
-</td>
-
-<td style="text-align:right;">
-
-0.206
-</td>
-
-<td style="text-align:right;">
-
-0.837
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Colombia - Guatemala
-</td>
-
-<td style="text-align:right;">
-
-1.923
-</td>
-
-<td style="text-align:right;">
-
-0.054
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Ecuador - Guatemala
-</td>
-
-<td style="text-align:right;">
-
-1.021
-</td>
-
-<td style="text-align:right;">
-
-0.307
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-El Salvador - Guatemala
-</td>
-
-<td style="text-align:right;">
-
-1.341
-</td>
-
-<td style="text-align:right;">
-
-0.180
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - Honduras
-</td>
-
-<td style="text-align:right;">
-
-0.893
-</td>
-
-<td style="text-align:right;">
-
-0.372
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Bolivia - Honduras
-</td>
-
-<td style="text-align:right;">
-
-0.684
-</td>
-
-<td style="text-align:right;">
-
-0.494
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Colombia - Honduras
-</td>
-
-<td style="text-align:right;">
-
-2.592
-</td>
-
-<td style="text-align:right;">
-
-0.010
-</td>
-
-<td style="text-align:right;">
-
-0.430
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Ecuador - Honduras
-</td>
-
-<td style="text-align:right;">
-
-1.331
-</td>
-
-<td style="text-align:right;">
-
-0.183
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-El Salvador - Honduras
-</td>
-
-<td style="text-align:right;">
-
-1.812
-</td>
-
-<td style="text-align:right;">
-
-0.070
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Guatemala - Honduras
-</td>
-
-<td style="text-align:right;">
-
-0.313
-</td>
-
-<td style="text-align:right;">
-
-0.754
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - Nicaragua
-</td>
-
-<td style="text-align:right;">
-
--2.731
-</td>
-
-<td style="text-align:right;">
-
-0.006
-</td>
-
-<td style="text-align:right;">
-
-0.284
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Bolivia - Nicaragua
-</td>
-
-<td style="text-align:right;">
-
--2.999
-</td>
-
-<td style="text-align:right;">
-
-0.003
-</td>
-
-<td style="text-align:right;">
-
-0.122
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Colombia - Nicaragua
-</td>
-
-<td style="text-align:right;">
-
-0.006
-</td>
-
-<td style="text-align:right;">
-
-0.995
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Ecuador - Nicaragua
-</td>
-
-<td style="text-align:right;">
-
--0.300
-</td>
-
-<td style="text-align:right;">
-
-0.764
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-El Salvador - Nicaragua
-</td>
-
-<td style="text-align:right;">
-
--0.416
-</td>
-
-<td style="text-align:right;">
-
-0.677
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Guatemala - Nicaragua
-</td>
-
-<td style="text-align:right;">
-
--1.911
-</td>
-
-<td style="text-align:right;">
-
-0.056
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Honduras - Nicaragua
-</td>
-
-<td style="text-align:right;">
-
--2.573
-</td>
-
-<td style="text-align:right;">
-
-0.010
-</td>
-
-<td style="text-align:right;">
-
-0.454
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - Perú
-</td>
-
-<td style="text-align:right;">
-
--0.431
-</td>
-
-<td style="text-align:right;">
-
-0.666
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Bolivia - Perú
-</td>
-
-<td style="text-align:right;">
-
--0.571
-</td>
-
-<td style="text-align:right;">
-
-0.568
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Colombia - Perú
-</td>
-
-<td style="text-align:right;">
-
-0.855
-</td>
-
-<td style="text-align:right;">
-
-0.393
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Ecuador - Perú
-</td>
-
-<td style="text-align:right;">
-
-0.397
-</td>
-
-<td style="text-align:right;">
-
-0.692
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-El Salvador - Perú
-</td>
-
-<td style="text-align:right;">
-
-0.499
-</td>
-
-<td style="text-align:right;">
-
-0.618
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Guatemala - Perú
-</td>
-
-<td style="text-align:right;">
-
--0.603
-</td>
-
-<td style="text-align:right;">
-
-0.546
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Honduras - Perú
-</td>
-
-<td style="text-align:right;">
-
--0.904
-</td>
-
-<td style="text-align:right;">
-
-0.366
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Nicaragua - Perú
-</td>
-
-<td style="text-align:right;">
-
-0.849
-</td>
-
-<td style="text-align:right;">
-
-0.396
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Argentina - Venezuela
-</td>
-
-<td style="text-align:right;">
-
--1.502
-</td>
-
-<td style="text-align:right;">
-
-0.133
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Bolivia - Venezuela
-</td>
-
-<td style="text-align:right;">
-
--1.910
-</td>
-
-<td style="text-align:right;">
-
-0.056
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Colombia - Venezuela
-</td>
-
-<td style="text-align:right;">
-
-1.930
-</td>
-
-<td style="text-align:right;">
-
-0.054
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Ecuador - Venezuela
-</td>
-
-<td style="text-align:right;">
-
-0.490
-</td>
-
-<td style="text-align:right;">
-
-0.624
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-El Salvador - Venezuela
-</td>
-
-<td style="text-align:right;">
-
-0.802
-</td>
-
-<td style="text-align:right;">
-
-0.422
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Guatemala - Venezuela
-</td>
-
-<td style="text-align:right;">
-
--1.021
-</td>
-
-<td style="text-align:right;">
-
-0.307
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Honduras - Venezuela
-</td>
-
-<td style="text-align:right;">
-
--1.660
-</td>
-
-<td style="text-align:right;">
-
-0.097
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Nicaragua - Venezuela
-</td>
-
-<td style="text-align:right;">
-
-1.891
-</td>
-
-<td style="text-align:right;">
-
-0.059
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Perú - Venezuela
-</td>
-
-<td style="text-align:right;">
-
--0.049
-</td>
-
-<td style="text-align:right;">
-
-0.961
-</td>
-
-<td style="text-align:right;">
-
-1.000
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-## Confirmatory Factor Analysis
-
-#### Mardia’s multivariate normality test
-
-``` r
-# Perform Mardia's test for multivariate normality
-mardia_test <- mvn(data = data[, 7:18], mvnTest = "mardia")
-mardia_test_N<-mardia_test$multivariateNormality
-# Extract and prepare the results for the table
-mardia_results <- data.frame(
-  Test = c("Skewness", "Kurtosis"),
-  Statistic = c(
-    (mardia_test_N[1,2]),
-    (mardia_test_N[2,2])
-    
-  ),
-  P_Value = c(
-  (mardia_test_N[1,3]),
-    (mardia_test_N[2,3])
-    
-  )
-)
-
-# Create and display the RMarkdown table
-mardia_results %>%
-  kbl(caption = "Mardia's Test for Multivariate Normality") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
+#### Appendix A5. Distribution of Hexad determinants by Gender
+
+| Measure               | female |   male | other |
+|:----------------------|-------:|-------:|------:|
+| N                     | 369.00 | 256.00 |  3.00 |
+| philanthropist_Mean   |  12.70 |  12.15 | 13.67 |
+| philanthropist_Median |  13.00 |  13.00 | 14.00 |
+| philanthropist_Min    |   4.00 |   2.00 | 13.00 |
+| philanthropist_Max    |  14.00 |  14.00 | 14.00 |
+| philanthropist_SD     |   1.81 |   2.46 |  0.58 |
+| socializer_Mean       |  11.14 |  11.13 | 12.00 |
+| socializer_Median     |  12.00 |  12.00 | 12.00 |
+| socializer_Min        |   2.00 |   2.00 | 10.00 |
+| socializer_Max        |  14.00 |  14.00 | 14.00 |
+| socializer_SD         |   2.91 |   2.93 |  2.00 |
+| freeSpirit_Mean       |  13.06 |  12.62 | 13.67 |
+| freeSpirit_Median     |  14.00 |  14.00 | 14.00 |
+| freeSpirit_Min        |   4.00 |   2.00 | 13.00 |
+| freeSpirit_Max        |  14.00 |  14.00 | 14.00 |
+| freeSpirit_SD         |   1.60 |   2.26 |  0.58 |
+| achiever_Mean         |  12.63 |  12.87 | 13.67 |
+| achiever_Median       |  13.00 |  13.00 | 14.00 |
+| achiever_Min          |   3.00 |   2.00 | 13.00 |
+| achiever_Max          |  14.00 |  14.00 | 14.00 |
+| achiever_SD           |   1.69 |   1.59 |  0.58 |
+| player_Mean           |  11.86 |  11.94 | 13.00 |
+| player_Median         |  13.00 |  13.00 | 13.00 |
+| player_Min            |   2.00 |   2.00 | 12.00 |
+| player_Max            |  14.00 |  14.00 | 14.00 |
+| player_SD             |   2.49 |   2.40 |  1.00 |
+| disruptor_Mean        |   7.82 |   8.27 |  9.33 |
+| disruptor_Median      |   8.00 |   9.00 | 12.00 |
+| disruptor_Min         |   2.00 |   2.00 |  2.00 |
+| disruptor_Max         |  14.00 |  14.00 | 14.00 |
+| disruptor_SD          |   3.61 |   3.81 |  6.43 |
+
+Distribution of Hexad determinants by Gender
+
+#### Appendix A6. Distribution of Hexad determinants by Age Group
+
+| Measure               |  18–24 |  25–34 |  35–49 |    50+ |
+|:----------------------|-------:|-------:|-------:|-------:|
+| N                     | 219.00 | 180.00 | 145.00 | 193.00 |
+| philanthropist_Mean   |  11.85 |  12.56 |  12.72 |  12.77 |
+| philanthropist_Median |  12.00 |  13.00 |  13.00 |  14.00 |
+| philanthropist_Min    |   2.00 |   2.00 |   7.00 |   2.00 |
+| philanthropist_Max    |  14.00 |  14.00 |  14.00 |  14.00 |
+| philanthropist_SD     |   2.45 |   2.22 |   1.76 |   2.08 |
+| socializer_Mean       |  10.73 |  11.12 |  11.31 |  11.25 |
+| socializer_Median     |  12.00 |  12.00 |  12.00 |  12.00 |
+| socializer_Min        |   2.00 |   2.00 |   2.00 |   2.00 |
+| socializer_Max        |  14.00 |  14.00 |  14.00 |  14.00 |
+| socializer_SD         |   3.14 |   2.94 |   2.82 |   2.92 |
+| freeSpirit_Mean       |  12.66 |  13.05 |  12.94 |  12.86 |
+| freeSpirit_Median     |  14.00 |  14.00 |  14.00 |  14.00 |
+| freeSpirit_Min        |   3.00 |   2.00 |   2.00 |   4.00 |
+| freeSpirit_Max        |  14.00 |  14.00 |  14.00 |  14.00 |
+| freeSpirit_SD         |   2.03 |   1.94 |   1.82 |   1.76 |
+| achiever_Mean         |  12.60 |  12.89 |  12.88 |  12.56 |
+| achiever_Median       |  13.00 |  14.00 |  14.00 |  13.00 |
+| achiever_Min          |   6.00 |   2.00 |   7.00 |   3.00 |
+| achiever_Max          |  14.00 |  14.00 |  14.00 |  14.00 |
+| achiever_SD           |   1.60 |   1.68 |   1.58 |   1.83 |
+| player_Mean           |  12.09 |  12.30 |  12.10 |  11.12 |
+| player_Median         |  13.00 |  13.00 |  13.00 |  12.00 |
+| player_Min            |   2.00 |   4.00 |   2.00 |   2.00 |
+| player_Max            |  14.00 |  14.00 |  14.00 |  14.00 |
+| player_SD             |   2.30 |   2.16 |   2.40 |   2.92 |
+| disruptor_Mean        |   8.00 |   7.97 |   7.90 |   7.90 |
+| disruptor_Median      |   8.00 |   8.00 |   8.00 |   8.00 |
+| disruptor_Min         |   2.00 |   2.00 |   2.00 |   2.00 |
+| disruptor_Max         |  14.00 |  14.00 |  14.00 |  14.00 |
+| disruptor_SD          |   3.70 |   3.67 |   3.52 |   3.99 |
+
+Distribution of Hexad determinants by Age Group
+
+#### Apendix A7. Distribution of Hexad determinants by Weekly Gaming Frequency
+
+| Measure               | 1–2 days | 3–4 days | 5–7 days |
+|:----------------------|---------:|---------:|---------:|
+| N                     |   379.00 |   133.00 |   136.00 |
+| philanthropist_Mean   |    12.45 |    12.47 |    12.23 |
+| philanthropist_Median |    13.00 |    13.00 |    13.00 |
+| philanthropist_Min    |     2.00 |     4.00 |     2.00 |
+| philanthropist_Max    |    14.00 |    14.00 |    14.00 |
+| philanthropist_SD     |     2.16 |     2.08 |     2.40 |
+| socializer_Mean       |    11.17 |    11.08 |    10.73 |
+| socializer_Median     |    12.00 |    12.00 |    12.00 |
+| socializer_Min        |     2.00 |     2.00 |     2.00 |
+| socializer_Max        |    14.00 |    14.00 |    14.00 |
+| socializer_SD         |     2.91 |     2.93 |     3.14 |
+| freeSpirit_Mean       |    12.94 |    12.65 |    12.92 |
+| freeSpirit_Median     |    14.00 |    13.00 |    14.00 |
+| freeSpirit_Min        |     2.00 |     4.00 |     4.00 |
+| freeSpirit_Max        |    14.00 |    14.00 |    14.00 |
+| freeSpirit_SD         |     1.93 |     1.90 |     1.82 |
+| achiever_Mean         |    12.78 |    12.59 |    12.65 |
+| achiever_Median       |    13.00 |    13.00 |    13.00 |
+| achiever_Min          |     2.00 |     4.00 |     3.00 |
+| achiever_Max          |    14.00 |    14.00 |    14.00 |
+| achiever_SD           |     1.69 |     1.72 |     1.81 |
+| player_Mean           |    11.88 |    12.07 |    12.05 |
+| player_Median         |    13.00 |    13.00 |    13.00 |
+| player_Min            |     3.00 |     2.00 |     2.00 |
+| player_Max            |    14.00 |    14.00 |    14.00 |
+| player_SD             |     2.44 |     2.42 |     2.52 |
+| disruptor_Mean        |     7.87 |     7.82 |     8.52 |
+| disruptor_Median      |     8.00 |     8.00 |     9.00 |
+| disruptor_Min         |     2.00 |     2.00 |     2.00 |
+| disruptor_Max         |    14.00 |    14.00 |    14.00 |
+| disruptor_SD          |     3.74 |     3.71 |     3.65 |
+
+Distribution of Hexad determinants by Weekly Gaming Frequency
+
+## 4.3. Distributional checks
+
+#### Appendix A8. Mardia’s multivariate normality test for Hexad-12 items
 
 <table class="table table-striped table-hover table-condensed table-responsive" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 
@@ -4028,39 +2283,68 @@ Kurtosis
 
 </table>
 
-#### Weighted Least Squares Mean and Variance Adjusted CFA
+## 4.4. Item-level diagnostics
 
-``` r
-# Specify the CFA model
-cfa_model <- '
-  Achiever =~ A2 + A4
-  Disruptor =~ D3 + D4
-  FreeSpirit =~ F1 + F3
-  Philanthropist =~ P1 + P4
-  Player =~ R2 + R4
-  Socializer =~ S2 + S4
-'
+#### Appendix A9. Summary Statistics per item
 
-# Fit the CFA model
-fit <- cfa(cfa_model, data = data,std.lv=TRUE, auto.efa = TRUE, estimator = "WLSMV")
- #
-# Global Fit Metrics
-results<-summary(fit, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+|     | vars |   n | mean |   sd | median | trimmed |  mad | min | max | range |  skew | kurtosis |   se |
+|:----|-----:|----:|-----:|-----:|-------:|--------:|-----:|----:|----:|------:|------:|---------:|-----:|
+| A2  |    1 | 866 | 6.17 | 1.11 |      7 |    6.39 | 0.00 |   1 |   7 |     6 | -1.58 |     2.61 | 0.04 |
+| A4  |    2 | 866 | 6.55 | 0.88 |      7 |    6.76 | 0.00 |   1 |   7 |     6 | -2.64 |     8.71 | 0.03 |
+| D3  |    3 | 866 | 4.12 | 2.12 |      4 |    4.16 | 2.97 |   1 |   7 |     6 | -0.18 |    -1.29 | 0.07 |
+| D4  |    4 | 866 | 3.86 | 2.14 |      4 |    3.82 | 2.97 |   1 |   7 |     6 |  0.00 |    -1.37 | 0.07 |
+| F1  |    5 | 866 | 6.38 | 1.14 |      7 |    6.65 | 0.00 |   1 |   7 |     6 | -2.38 |     6.21 | 0.04 |
+| F3  |    6 | 866 | 6.39 | 1.17 |      7 |    6.67 | 0.00 |   1 |   7 |     6 | -2.44 |     6.34 | 0.04 |
+| P1  |    7 | 866 | 6.36 | 1.21 |      7 |    6.66 | 0.00 |   1 |   7 |     6 | -2.58 |     7.14 | 0.04 |
+| P4  |    8 | 866 | 6.01 | 1.38 |      7 |    6.29 | 0.00 |   1 |   7 |     6 | -1.70 |     2.70 | 0.05 |
+| R2  |    9 | 866 | 5.88 | 1.41 |      6 |    6.12 | 1.48 |   1 |   7 |     6 | -1.35 |     1.40 | 0.05 |
+| R4  |   10 | 866 | 5.96 | 1.51 |      7 |    6.28 | 0.00 |   1 |   7 |     6 | -1.64 |     2.11 | 0.05 |
+| S2  |   11 | 866 | 5.50 | 1.70 |      6 |    5.78 | 1.48 |   1 |   7 |     6 | -1.11 |     0.41 | 0.06 |
+| S4  |   12 | 866 | 5.46 | 1.69 |      6 |    5.72 | 1.48 |   1 |   7 |     6 | -1.07 |     0.34 | 0.06 |
 
+Summary Statistics per item
 
+#### Appendix A10. Response distributions for each Hexad-12 item
 
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
-# install.packages("kableExtra")  # if you haven’t already
+#### Appendix A11. Multimodality Silverman tests results
 
-kable(
-  results$pe[1:12, c(2:8, 10)],
-  caption = "Estimated factor loading for Hexad-12 items",
-  digits  = 3,
-  format = "html"
-) %>%
-  kable_styling(full_width = TRUE) %>%
-  column_spec(1:ncol(results$pe[1:12, c(2:8, 10)]), width = "2cm")
-```
+    ## A2   bw = 0.520  p = 0.274
+    ## A4   bw = 0.589  p = 0.468
+    ## D3   bw = 1.079  p = 0.008
+    ## D4   bw = 1.279  p = 0.023
+    ## F1   bw = 0.685  p = 0.160
+    ## F3   bw = 0.668  p = 0.176
+    ## P1   bw = 0.837  p = 0.098
+    ## P4   bw = 0.542  p = 0.338
+    ## R2   bw = 0.421  p = 0.360
+    ## R4   bw = 0.571  p = 0.303
+    ## S2   bw = 0.685  p = 0.012
+    ## S4   bw = 0.652  p = 0.020
+
+#### Appendix A12. Item–total correlation for each subscale
+
+|     |    x |
+|:----|-----:|
+| A2  | 0.33 |
+| A4  | 0.40 |
+| D3  | 0.11 |
+| D4  | 0.09 |
+| F1  | 0.49 |
+| F3  | 0.44 |
+| P1  | 0.50 |
+| P4  | 0.38 |
+| R2  | 0.35 |
+| R4  | 0.33 |
+| S2  | 0.40 |
+| S4  | 0.39 |
+
+Item–total correlation for each subscale
+
+## 4.5. Confirmatory Factor Analysis
+
+#### Table 4: Estimated factor loadings for Hexad-12 items
 
 <table class="table" style="color: black; margin-left: auto; margin-right: auto;">
 
@@ -4651,89 +2935,9 @@ S4
 
 </table>
 
-### CFA metrics with confident interval
+#### CFA
 
-``` r
-reliability_metrics <- semTools::reliability(fit)
-CR<-reliability_metrics[2,]
-AVE<-reliability_metrics[5,]
-  
-
-  # Extract relevant fit measures
-  fit_measures_final <- fitMeasures(fit,standardized = TRUE, rsquare = TRUE, c("chisq.scaled", "srmr", "tli.scaled", "cfi.scaled", "rmsea.scaled"))
-
-  fit_measures_final<-c(fit_measures_final, CR, AVE)
-  
-
-# Function to take a bootstrap sample and perform CFA, returning CR, Omega, and AVE
-bootstrap_cfa_cr_omega_ave <- function(data, cfa_model) {
-  # Generate a bootstrap sample (with replacement)
-  bootstrap_sample <- data[sample(1:nrow(data), replace = TRUE), ]
-  
-
-# Fit the CFA model
-fit <- cfa(cfa_model, data = bootstrap_sample,std.lv=TRUE, auto.efa = TRUE, estimator = "WLSMV")
-
- # Calculate reliability metrics (including Composite Reliability)
-reliability_metrics <- semTools::reliability(fit)
-  CR<-reliability_metrics[2,]
- AVE<-reliability_metrics[5,]
-  
-
-  # Extract relevant fit measures
-  fit_measures <- fitMeasures(fit, c("chisq.scaled", "srmr", "tli.scaled", "cfi.scaled", "rmsea.scaled"))
-
-  fit_measures<-c(fit_measures, CR, AVE)
- 
-  return(fit_measures)
-}
-
-# Perform bootstrap sampling
-set.seed(123)  # For reproducibility
-num_bootstrap <- 10000  # Number of bootstrap samples8u-p0
-
-# Initialize matrix to store CR, Omega, and AVE
-fit_metrics <- matrix(NA, nrow = num_bootstrap, ncol = 17)
-# List of columns to calculate confidence intervals for
-columns_to_ci <- c("chisq.scaled", "srmr", "tli.scaled", "cfi.scaled", "rmsea.scaled", 
-                   "CR.Achiever", "CR.Disruptor", "CR.FreeSpirit", "CR.Philanthropist", 
-                   "CR.Player", "CR.Socializer", 
-                   "AVE.Achiever", "AVE.Disruptor", "AVE.FreeSpirit", 
-                   "AVE.Philanthropist", "AVE.Player", "AVE.Socializer")
-colnames(fit_metrics) <- columns_to_ci
-
-# Bootstrap loop
-for (i in 1:num_bootstrap) {
-  fit_metrics[i, ] <- bootstrap_cfa_cr_omega_ave(data, cfa_model)
-}
-
-
-  names(fit_measures_final) <- columns_to_ci
-
-
-# Initialize an empty data frame to store the results
-results_table <- data.frame(
-  Metric = columns_to_ci,
-  Estimate = numeric(length(columns_to_ci)),
-  CI_Lower = numeric(length(columns_to_ci)),
-  CI_Upper = numeric(length(columns_to_ci)),
-  stringsAsFactors = FALSE
-)
-
-# Populate the results table with confidence intervals and estimates
-for (i in seq_along(columns_to_ci)) {
-  col <- columns_to_ci[i]
-  ci <- quantile(fit_metrics[, col], probs = c(0.025, 0.975))
-  results_table$Estimate[i] <- round(fit_measures_final[col], 3)  # Add the estimate and round
-  results_table$CI_Lower[i] <- round(ci[1], 3)  # Round lower CI
-  results_table$CI_Upper[i] <- round(ci[2], 3)  # Round upper CI
-}
-
-# Correctly print the table in a nicely formatted way
-results_table %>%
-  kbl(caption = "CFA  metrics with confident interval", format = "markdown",digits  = 2) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
+#### CFA fit indices with 95% CI using bootstrapping with 10,000 samples (Table 5)
 
 <table class="table table-striped table-hover table-condensed table-responsive" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 
@@ -4781,17 +2985,17 @@ chisq.scaled
 
 <td style="text-align:right;">
 
-77.32
+77.320
 </td>
 
 <td style="text-align:right;">
 
-69.54
+69.545
 </td>
 
 <td style="text-align:right;">
 
-141.81
+141.811
 </td>
 
 </tr>
@@ -4805,17 +3009,17 @@ srmr
 
 <td style="text-align:right;">
 
-0.03
+0.026
 </td>
 
 <td style="text-align:right;">
 
-0.02
+0.024
 </td>
 
 <td style="text-align:right;">
 
-0.04
+0.037
 </td>
 
 </tr>
@@ -4829,17 +3033,17 @@ tli.scaled
 
 <td style="text-align:right;">
 
-0.91
+0.914
 </td>
 
 <td style="text-align:right;">
 
-0.77
+0.766
 </td>
 
 <td style="text-align:right;">
 
-0.93
+0.933
 </td>
 
 </tr>
@@ -4853,17 +3057,17 @@ cfi.scaled
 
 <td style="text-align:right;">
 
-0.95
+0.949
 </td>
 
 <td style="text-align:right;">
 
-0.86
+0.862
 </td>
 
 <td style="text-align:right;">
 
-0.96
+0.960
 </td>
 
 </tr>
@@ -4877,17 +3081,17 @@ rmsea.scaled
 
 <td style="text-align:right;">
 
-0.03
+0.034
 </td>
 
 <td style="text-align:right;">
 
-0.03
+0.030
 </td>
 
 <td style="text-align:right;">
 
-0.06
+0.055
 </td>
 
 </tr>
@@ -4901,17 +3105,17 @@ CR.Achiever
 
 <td style="text-align:right;">
 
-0.62
+0.619
 </td>
 
 <td style="text-align:right;">
 
-0.52
+0.524
 </td>
 
 <td style="text-align:right;">
 
-0.70
+0.698
 </td>
 
 </tr>
@@ -4925,17 +3129,17 @@ CR.Disruptor
 
 <td style="text-align:right;">
 
-0.74
+0.738
 </td>
 
 <td style="text-align:right;">
 
-0.69
+0.693
 </td>
 
 <td style="text-align:right;">
 
-0.82
+0.817
 </td>
 
 </tr>
@@ -4949,17 +3153,17 @@ CR.FreeSpirit
 
 <td style="text-align:right;">
 
-0.74
+0.740
 </td>
 
 <td style="text-align:right;">
 
-0.66
+0.665
 </td>
 
 <td style="text-align:right;">
 
-0.80
+0.800
 </td>
 
 </tr>
@@ -4973,17 +3177,17 @@ CR.Philanthropist
 
 <td style="text-align:right;">
 
-0.76
+0.758
 </td>
 
 <td style="text-align:right;">
 
-0.69
+0.693
 </td>
 
 <td style="text-align:right;">
 
-0.81
+0.813
 </td>
 
 </tr>
@@ -4997,17 +3201,17 @@ CR.Player
 
 <td style="text-align:right;">
 
-0.67
+0.674
 </td>
 
 <td style="text-align:right;">
 
-0.61
+0.611
 </td>
 
 <td style="text-align:right;">
 
-0.73
+0.731
 </td>
 
 </tr>
@@ -5021,17 +3225,17 @@ CR.Socializer
 
 <td style="text-align:right;">
 
-0.80
+0.802
 </td>
 
 <td style="text-align:right;">
 
-0.76
+0.759
 </td>
 
 <td style="text-align:right;">
 
-0.84
+0.841
 </td>
 
 </tr>
@@ -5045,17 +3249,17 @@ AVE.Achiever
 
 <td style="text-align:right;">
 
-0.45
+0.448
 </td>
 
 <td style="text-align:right;">
 
-0.36
+0.356
 </td>
 
 <td style="text-align:right;">
 
-0.54
+0.537
 </td>
 
 </tr>
@@ -5069,17 +3273,17 @@ AVE.Disruptor
 
 <td style="text-align:right;">
 
-0.59
+0.589
 </td>
 
 <td style="text-align:right;">
 
-0.53
+0.532
 </td>
 
 <td style="text-align:right;">
 
-0.71
+0.711
 </td>
 
 </tr>
@@ -5093,17 +3297,17 @@ AVE.FreeSpirit
 
 <td style="text-align:right;">
 
-0.59
+0.587
 </td>
 
 <td style="text-align:right;">
 
-0.50
+0.499
 </td>
 
 <td style="text-align:right;">
 
-0.67
+0.667
 </td>
 
 </tr>
@@ -5117,17 +3321,17 @@ AVE.Philanthropist
 
 <td style="text-align:right;">
 
-0.61
+0.611
 </td>
 
 <td style="text-align:right;">
 
-0.53
+0.531
 </td>
 
 <td style="text-align:right;">
 
-0.69
+0.685
 </td>
 
 </tr>
@@ -5141,17 +3345,17 @@ AVE.Player
 
 <td style="text-align:right;">
 
-0.51
+0.509
 </td>
 
 <td style="text-align:right;">
 
-0.44
+0.441
 </td>
 
 <td style="text-align:right;">
 
-0.58
+0.576
 </td>
 
 </tr>
@@ -5165,17 +3369,17 @@ AVE.Socializer
 
 <td style="text-align:right;">
 
-0.67
+0.670
 </td>
 
 <td style="text-align:right;">
 
-0.61
+0.612
 </td>
 
 <td style="text-align:right;">
 
-0.72
+0.725
 </td>
 
 </tr>
@@ -5184,15 +3388,172 @@ AVE.Socializer
 
 </table>
 
-#### CFA Standardized residuals
+#### CFA fit indices with 95% CI using bootstrapping with 10,000 samples (Sensitivy analysis:without “fast_responders” \< 52.28sec )
 
-``` r
-# Local Fit: Residuals  Standardized residuals
-standardized_residuals <- residuals(fit, type = "standardized")
+    ## [1] 650  25
 
+<table class="table table-striped table-hover table-condensed table-responsive" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 
-kable(standardized_residuals, caption = "Standardized Residuals for the Hexad-12 items from the CFA",digits  = 3)
-```
+<caption>
+
+CFA metrics with confident interval
+</caption>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+Metric
+</th>
+
+<th style="text-align:right;">
+
+Estimate
+</th>
+
+<th style="text-align:right;">
+
+CI_Lower
+</th>
+
+<th style="text-align:right;">
+
+CI_Upper
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+chisq.scaled
+</td>
+
+<td style="text-align:right;">
+
+77.320
+</td>
+
+<td style="text-align:right;">
+
+64.277
+</td>
+
+<td style="text-align:right;">
+
+132.580
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+srmr
+</td>
+
+<td style="text-align:right;">
+
+0.026
+</td>
+
+<td style="text-align:right;">
+
+0.027
+</td>
+
+<td style="text-align:right;">
+
+0.043
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+tli.scaled
+</td>
+
+<td style="text-align:right;">
+
+0.914
+</td>
+
+<td style="text-align:right;">
+
+0.685
+</td>
+
+<td style="text-align:right;">
+
+0.917
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+cfi.scaled
+</td>
+
+<td style="text-align:right;">
+
+0.949
+</td>
+
+<td style="text-align:right;">
+
+0.814
+</td>
+
+<td style="text-align:right;">
+
+0.951
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+rmsea.scaled
+</td>
+
+<td style="text-align:right;">
+
+0.034
+</td>
+
+<td style="text-align:right;">
+
+0.032
+</td>
+
+<td style="text-align:right;">
+
+0.061
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+#### Appendix A13. Standardized Residuals for the Hexad-12 items from the CFA
 
 <table class="kable_wrapper">
 
@@ -5217,7 +3578,7 @@ Standardized Residuals for the Hexad-12 items from the CFA
 
 |  | A2 | A4 | D3 | D4 | F1 | F3 | P1 | P4 | R2 | R4 | S2 | S4 |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| A2 | 0.000 | 0.000 | 1.440 | 0.150 | -1.056 | 1.468 | -0.298 | -2.295 | -0.560 | -0.921 | 1.983 | 1.439 |
+| A2 | 0.000 | 0.000 | 1.440 | 0.150 | -1.056 | 1.468 | -0.298 | -2.295 | -0.560 | -0.921 | 1.984 | 1.439 |
 | A4 | 0.000 | 0.000 | -0.100 | -1.113 | -1.045 | 1.046 | 2.628 | 0.974 | -0.977 | 2.708 | -1.844 | -1.547 |
 | D3 | 1.440 | -0.100 | 0.000 | 0.000 | 1.244 | 0.704 | -0.015 | -0.812 | -1.361 | -0.840 | 0.525 | 0.067 |
 | D4 | 0.150 | -1.113 | 0.000 | 0.000 | 0.983 | -2.826 | 2.289 | -1.642 | 0.210 | 1.795 | -0.167 | -0.337 |
@@ -5227,7 +3588,7 @@ Standardized Residuals for the Hexad-12 items from the CFA
 | P4 | -2.295 | 0.974 | -0.812 | -1.642 | -2.289 | 0.816 | 0.000 | 0.000 | -0.235 | -2.554 | 0.929 | 1.306 |
 | R2 | -0.560 | -0.977 | -1.361 | 0.210 | -0.554 | -2.281 | 1.277 | -0.235 | 0.000 | 0.000 | 2.901 | 0.851 |
 | R4 | -0.921 | 2.708 | -0.840 | 1.795 | 3.620 | -0.836 | 1.709 | -2.554 | 0.000 | 0.000 | -0.927 | -2.877 |
-| S2 | 1.983 | -1.844 | 0.525 | -0.167 | -0.639 | -0.631 | -1.929 | 0.929 | 2.901 | -0.927 | 0.000 | 0.000 |
+| S2 | 1.984 | -1.844 | 0.525 | -0.167 | -0.639 | -0.631 | -1.929 | 0.929 | 2.901 | -0.927 | 0.000 | 0.000 |
 | S4 | 1.439 | -1.547 | 0.067 | -0.337 | 1.376 | -0.226 | -0.921 | 1.306 | 0.851 | -2.877 | 0.000 | 0.000 |
 
 </td>
@@ -5238,14 +3599,7 @@ Standardized Residuals for the Hexad-12 items from the CFA
 
 </table>
 
-#### CFA Correlation residuals
-
-``` r
-#Correlation residuals
-
-
-kable(residuals(fit, type = "cor"), caption = "Correlation Residuals for the Hexad-12 items from the CFA",digits  = 3)
-```
+#### Appendix A14. Correlation Residuals for the Hexad-12 items from the CFA
 
 <table class="kable_wrapper">
 
@@ -5291,152 +3645,83 @@ Correlation Residuals for the Hexad-12 items from the CFA
 
 </table>
 
-## Internal Reliability
+#### Appendix A15. Modification indices Hexad-12 scale
 
-``` r
-# Load necessary libraries
-library(psych)  # For Cronbach's alpha and McDonald's omega
-library(boot)   # For bootstrapping confidence intervals
+|     | Path       |     |     |    MI |    EPC | Std.EPC |
+|:----|:-----------|:----|:----|------:|-------:|--------:|
+| 105 | Socializer | =~  | R4  | 5.755 |  0.146 |   0.136 |
+| 104 | Socializer | =~  | R2  | 5.755 | -0.147 |  -0.146 |
+| 148 | F1         | \~~ | R4  | 4.734 | -0.203 |  -0.264 |
+| 71  | FreeSpirit | =~  | P4  | 3.631 |  0.299 |   0.195 |
+| 70  | FreeSpirit | =~  | P1  | 3.631 | -0.315 |  -0.235 |
+| 137 | D4         | \~~ | F3  | 3.459 |  0.197 |   0.232 |
+| 170 | R4         | \~~ | S4  | 3.393 |  0.207 |   0.191 |
+| 167 | R2         | \~~ | S2  | 3.321 | -0.209 |  -0.229 |
+| 93  | Player     | =~  | P4  | 3.147 |  0.127 |   0.096 |
+| 92  | Player     | =~  | P1  | 3.147 | -0.134 |  -0.116 |
 
-# Define pairs of columns for which to calculate reliability metrics
-pairs <- list(
-  c("A2", "A4"),
-  c("D3", "D4"),
-  c("F1", "F3"),
-  c("P1", "P4"),
-  c("R2", "R4"),
-  c("S2", "S4")
-)
+Modification indices Hexad-12 scale
 
+## 4.6. Reliability
 
-merged_hexad<-data
-# Cronbach's alpha function
-cronbach_alpha_fn <- function(data, indices, item1, item2) {
-  samp <- data[indices, c(item1, item2)]
-  psych::alpha(samp)$total$raw_alpha
-}
+#### Table 5: Reliability metrics
 
-# Spearman-Brown function
-spearman_brown_fn <- function(data, indices, item1, item2) {
-  samp <- data[indices, ]
-  r <- cor(samp[[item1]], samp[[item2]], method = "pearson", use = "pairwise.complete.obs")
-  2 * r / (1 + r)
-}
+|  |  |  |  |  |  |  |
+|:---|:---|:---|:---|:---|:---|:---|
+| Subscale | Philanthropist | Socializer | Achiever | Player | Disruptor | Free Spirit |
+| SB_Estimate | 0.76 | 0.80 | 0.63 | 0.68 | 0.72 | 0.74 |
+| SB_CI_Lower | 0.70 | 0.76 | 0.54 | 0.61 | 0.68 | 0.67 |
+| SB_CI_Upper | 0.82 | 0.84 | 0.71 | 0.73 | 0.76 | 0.80 |
+| Omega_Estimate | 0.76 | 0.80 | 0.63 | 0.68 | 0.72 | 0.74 |
+| Omega_CI_Lower | 0.70 | 0.76 | 0.53 | 0.61 | 0.68 | 0.66 |
+| Omega_CI_Upper | 0.82 | 0.84 | 0.71 | 0.73 | 0.76 | 0.80 |
+| OrdOmega_Estimate | 0.84 | 0.85 | 0.72 | 0.75 | 0.77 | 0.83 |
+| OrdOmega_CI_Lower | 0.80 | 0.82 | 0.65 | 0.69 | 0.73 | 0.78 |
+| OrdOmega_CI_Upper | 0.87 | 0.88 | 0.78 | 0.79 | 0.80 | 0.87 |
 
-# McDonald's omega function
-mcdonald_omega_fn <- function(data, indices, item1, item2) {
-  samp <- data[indices, c(item1, item2)]
-  # fit 1-factor model and extract total omega
-  psych::omega(samp, nfactors = 1, plot = FALSE)$omega.tot
-}
+Reliability Table for Hexad-12 Subscales
 
-# Prepare results data frame
-results <- data.frame(
-  Pair                      = character(),
-  Alpha_Estimate            = numeric(), Alpha_CI_Lower = numeric(), Alpha_CI_Upper = numeric(),
-  Spearman_Brown_Estimate   = numeric(), SB_CI_Lower    = numeric(), SB_CI_Upper    = numeric(),
-  Omega_Estimate            = numeric(), Omega_CI_Lower = numeric(), Omega_CI_Upper = numeric(),
-  stringsAsFactors = FALSE
-)
+| Subscale       | OrdCR_Estimate | OrdCR_CI_Lower | OrdCR_CI_Upper |
+|:---------------|---------------:|---------------:|---------------:|
+| Philanthropist |           0.86 |           0.83 |           0.89 |
+| Socializer     |           0.87 |           0.85 |           0.89 |
+| Achiever       |           0.78 |           0.74 |           0.82 |
+| Player         |           0.80 |           0.77 |           0.83 |
+| Disruptor      |           0.81 |           0.79 |           0.83 |
+| Free Spirit    |           0.85 |           0.82 |           0.88 |
 
-# Loop through each pair and bootstrap all three metrics
-for (pair in pairs) {
-  item1 <- pair[1]; item2 <- pair[2]
-  pair_name <- paste(item1, item2, sep = "_")
-  
-  # Cronbach's alpha bootstrap
-  alpha_boot <- boot(data = merged_hexad, statistic = cronbach_alpha_fn,
-                     R = 10000, item1 = item1, item2 = item2)
-  alpha_est <- alpha_boot$t0
-  alpha_ci  <- boot.ci(alpha_boot, type = "perc")$percent[4:5]
-  
-  # Spearman-Brown bootstrap
-  sb_boot <- boot(data = merged_hexad, statistic = spearman_brown_fn,
-                  R = 10000, item1 = item1, item2 = item2)
-  sb_est <- sb_boot$t0
-  sb_ci  <- boot.ci(sb_boot, type = "perc")$percent[4:5]
-  
-  # McDonald's omega bootstrap
-  omega_boot <- boot(data = merged_hexad, statistic = mcdonald_omega_fn,
-                     R = 10000, item1 = item1, item2 = item2)
-  omega_est <- omega_boot$t0
-  omega_ci  <- boot.ci(omega_boot, type = "perc")$percent[4:5]
-  
-  # Append to results
-  results <- rbind(results, data.frame(
-    Pair                    = pair_name,
-    Alpha_Estimate          = round(alpha_est,  2),
-    Alpha_CI_Lower          = round(alpha_ci[1], 2),
-    Alpha_CI_Upper          = round(alpha_ci[2], 2),
-    Spearman_Brown_Estimate = round(sb_est,     2),
-    SB_CI_Lower             = round(sb_ci[1],  2),
-    SB_CI_Upper             = round(sb_ci[2],  2),
-    Omega_Estimate          = round(omega_est,  2),
-    Omega_CI_Lower          = round(omega_ci[1], 2),
-    Omega_CI_Upper          = round(omega_ci[2], 2)
-  ))
-}
+Oridinal CR for Hexad-12 Subscales
 
-# Print the results
+## 4.7. Convergent and discriminant validity
 
+#### Appendix A16. Heterotrait–Monotrait (HTMT) ratios
 
-kable(results, caption = "Internal reliability, Composite Reliability (CR) estimates, and Average Variance Extracted (AVE) for each Hexad-12 scale. ",digits  = 2)
-```
+    ## 
+    ## Maximum HTMT: 0.705  | Strict OK (< .85)? TRUE  | Lenient OK (< .90)? TRUE
 
-| Pair | Alpha_Estimate | Alpha_CI_Lower | Alpha_CI_Upper | Spearman_Brown_Estimate | SB_CI_Lower | SB_CI_Upper | Omega_Estimate | Omega_CI_Lower | Omega_CI_Upper |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| A2_A4 | 0.62 | 0.52 | 0.70 | 0.63 | 0.53 | 0.71 | 0.63 | 0.53 | 0.71 |
-| D3_D4 | 0.72 | 0.68 | 0.76 | 0.72 | 0.68 | 0.76 | 0.72 | 0.68 | 0.76 |
-| F1_F3 | 0.74 | 0.66 | 0.80 | 0.74 | 0.67 | 0.80 | 0.74 | 0.66 | 0.80 |
-| P1_P4 | 0.76 | 0.69 | 0.81 | 0.76 | 0.70 | 0.82 | 0.76 | 0.70 | 0.82 |
-| R2_R4 | 0.67 | 0.61 | 0.73 | 0.68 | 0.61 | 0.73 | 0.68 | 0.61 | 0.73 |
-| S2_S4 | 0.80 | 0.76 | 0.84 | 0.80 | 0.76 | 0.84 | 0.80 | 0.76 | 0.84 |
+    ## 
+    ## 
+    ## Table: HTMT (polychoric) with 95% bootstrap CIs; max HTMT = 0.705  [R_boot = 10000]
+    ## 
+    ## |Factor1        |Factor2    |  HTMT| CI_lower| CI_upper|
+    ## |:--------------|:----------|-----:|--------:|--------:|
+    ## |Philanthropist |Socializer | 0.705|    0.637|    0.770|
+    ## |Philanthropist |FreeSpirit | 0.612|    0.521|    0.695|
+    ## |Philanthropist |Achiever   | 0.440|    0.326|    0.551|
+    ## |Philanthropist |Player     | 0.313|    0.212|    0.413|
+    ## |Philanthropist |Disruptor  | 0.161|    0.067|    0.260|
+    ## |Socializer     |FreeSpirit | 0.412|    0.311|    0.506|
+    ## |Socializer     |Achiever   | 0.368|    0.271|    0.462|
+    ## |Socializer     |Player     | 0.357|    0.258|    0.453|
+    ## |Socializer     |Disruptor  | 0.243|    0.149|    0.334|
+    ## |FreeSpirit     |Achiever   | 0.662|    0.560|    0.760|
+    ## |FreeSpirit     |Player     | 0.455|    0.356|    0.551|
+    ## |FreeSpirit     |Disruptor  | 0.105|    0.050|    0.197|
+    ## |Achiever       |Player     | 0.543|    0.437|    0.647|
+    ## |Achiever       |Disruptor  | 0.042|    0.025|    0.145|
+    ## |Player         |Disruptor  | 0.067|    0.026|    0.172|
 
-Internal reliability, Composite Reliability (CR) estimates, and Average Variance Extracted (AVE) for each Hexad-12 scale.
-
-## Correlaiton metric Kendals Tau
-
-``` r
-# Reorganize columns in the desired order
-columns <- c("philanthropist", "socializer", "achiever", "player", "disruptor", "freeSpirit")
-data_subset <- data[columns]
-
-# Initialize matrices for correlations and p-values
-n <- length(columns)
-cor_matrix <- matrix("", n, n, dimnames = list(columns, columns))
-p_matrix <- matrix(NA, n, n, dimnames = list(columns, columns))
-
-# Calculate Kendall Tau correlations and p-values
-for (i in 1:n) {
-  for (j in i:n) {
-    if (i == j) {
-      cor_matrix[i, j] <- "1.000"
-    } else {
-      test <- cor.test(data_subset[[i]], data_subset[[j]], method = "kendall", use = "pairwise.complete.obs")
-      correlation <- round(test$estimate, 3)
-      p_value <- round(test$p.value, 3)
-      significance <- ifelse(p_value < 0.001, "***", 
-                      ifelse(p_value < 0.01, "**", 
-                      ifelse(p_value < 0.05, "*", "")))
-      
-      cor_matrix[i, j] <- ""
-      cor_matrix[j, i] <- paste0(correlation, significance)
-    }
-  }
-}
-
-# Convert the correlation matrix to a data frame for display
-cor_matrix_df <- as.data.frame(cor_matrix, row.names = columns)
-rownames(cor_matrix_df) <- c("Philanthropic", "Socializer", "Achiever", "Player", "Disruptor", "Free Spirit")
-colnames(cor_matrix_df) <- c("Philanthropic", "Socializer", "Achiever", "Player", "Disruptor", "Free Spirit")
-
-# Display the correlation matrix as a nicely formatted RMarkdown table
-cor_matrix_df %>%
-  kbl(
-    caption = "Lower Triangle of Kendall Tau Correlation Matrix with Significance. Significance Legend: *** p < 0.001, ** p < 0.01, * p < 0.05"
-  ) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
+#### Table 6 Bivariate correlation coefficients Kendall’s tau between the Hexad subscales
 
 <table class="table table-striped table-hover table-condensed table-responsive" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 
@@ -5712,139 +3997,239 @@ Free Spirit
 
 </table>
 
-# Item by Item Analysis
+#### Appendix A17. Latent correlations among Hexad determinants
 
-``` r
-# Required packages
-library(psych)       # describe(), alpha(), omega()
-library(lavaan)      # cfa()
-library(semTools)    # omegaSem()
-library(ggplot2)     # plotting
-library(dplyr)       # data wrangling
-library(purrr)       # map*
+|     | Factor 1       | Factor 2       | Latent r | 95% CI Lower | 95% CI Upper |
+|:----|:---------------|:---------------|---------:|-------------:|-------------:|
+| 31  | Achiever       | Disruptor      |    0.033 |       -0.056 |        0.119 |
+| 32  | Achiever       | FreeSpirit     |    0.565 |        0.225 |        0.463 |
+| 33  | Achiever       | Philanthropist |    0.339 |        0.118 |        0.358 |
+| 34  | Achiever       | Player         |    0.443 |        0.194 |        0.432 |
+| 35  | Achiever       | Socializer     |    0.299 |        0.174 |        0.392 |
+| 36  | Disruptor      | FreeSpirit     |    0.057 |       -0.049 |        0.192 |
+| 37  | Disruptor      | Philanthropist |   -0.139 |       -0.350 |       -0.056 |
+| 38  | Disruptor      | Player         |    0.071 |       -0.041 |        0.251 |
+| 39  | Disruptor      | Socializer     |   -0.208 |       -0.622 |       -0.197 |
+| 40  | FreeSpirit     | Philanthropist |    0.598 |        0.375 |        0.746 |
+| 41  | FreeSpirit     | Player         |    0.353 |        0.218 |        0.446 |
+| 42  | FreeSpirit     | Socializer     |    0.356 |        0.288 |        0.611 |
+| 43  | Philanthropist | Player         |    0.227 |        0.123 |        0.371 |
+| 44  | Philanthropist | Socializer     |    0.663 |        0.735 |        1.197 |
+| 45  | Player         | Socializer     |    0.273 |        0.246 |        0.555 |
 
-# Define your 12 item columns
-item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
-df_items  <- merged_hexad[ , item_cols ]
+Latent correlations among Hexad determinants
 
-# 1. Descriptive statistics
-desc_stats <- describe(df_items)
+## 4.8. Criterion-related and group-level analyses
 
-kable(desc_stats, caption = "Summary Statistics per item",digits  = 2)
-```
+### Game frequency-related patterns in Hexad-12 scores.
 
-|     | vars |   n | mean |   sd | median | trimmed |  mad | min | max | range |  skew | kurtosis |   se |
-|:----|-----:|----:|-----:|-----:|-------:|--------:|-----:|----:|----:|------:|------:|---------:|-----:|
-| A2  |    1 | 866 | 6.17 | 1.11 |      7 |    6.39 | 0.00 |   1 |   7 |     6 | -1.58 |     2.61 | 0.04 |
-| A4  |    2 | 866 | 6.55 | 0.88 |      7 |    6.76 | 0.00 |   1 |   7 |     6 | -2.64 |     8.71 | 0.03 |
-| D3  |    3 | 866 | 4.12 | 2.12 |      4 |    4.16 | 2.97 |   1 |   7 |     6 | -0.18 |    -1.29 | 0.07 |
-| D4  |    4 | 866 | 3.86 | 2.14 |      4 |    3.82 | 2.97 |   1 |   7 |     6 |  0.00 |    -1.37 | 0.07 |
-| F1  |    5 | 866 | 6.38 | 1.14 |      7 |    6.65 | 0.00 |   1 |   7 |     6 | -2.38 |     6.21 | 0.04 |
-| F3  |    6 | 866 | 6.39 | 1.17 |      7 |    6.67 | 0.00 |   1 |   7 |     6 | -2.44 |     6.34 | 0.04 |
-| P1  |    7 | 866 | 6.36 | 1.21 |      7 |    6.66 | 0.00 |   1 |   7 |     6 | -2.58 |     7.14 | 0.04 |
-| P4  |    8 | 866 | 6.01 | 1.38 |      7 |    6.29 | 0.00 |   1 |   7 |     6 | -1.70 |     2.70 | 0.05 |
-| R2  |    9 | 866 | 5.88 | 1.41 |      6 |    6.12 | 1.48 |   1 |   7 |     6 | -1.35 |     1.40 | 0.05 |
-| R4  |   10 | 866 | 5.96 | 1.51 |      7 |    6.28 | 0.00 |   1 |   7 |     6 | -1.64 |     2.11 | 0.05 |
-| S2  |   11 | 866 | 5.50 | 1.70 |      6 |    5.78 | 1.48 |   1 |   7 |     6 | -1.11 |     0.41 | 0.06 |
-| S4  |   12 | 866 | 5.46 | 1.69 |      6 |    5.72 | 1.48 |   1 |   7 |     6 | -1.07 |     0.34 | 0.06 |
+#### Appendix A18. Correlations between Hexad determinants and gaming frequency
 
-Summary Statistics per item
+| Determinant    |   n |    tau | p_value |
+|:---------------|----:|-------:|--------:|
+| philanthropist | 648 | -0.054 |   0.092 |
+| socializer     | 648 | -0.067 |   0.031 |
+| freeSpirit     | 648 | -0.059 |   0.075 |
+| achiever       | 648 | -0.078 |   0.016 |
+| player         | 648 |  0.013 |   0.673 |
+| disruptor      | 648 |  0.026 |   0.394 |
 
-``` r
-# 2. Item–total correlations
-merged_hexad$total_score <- rowSums(df_items, na.rm=TRUE)
-item_total_corrs <- map_dbl(item_cols, ~ cor(
-  merged_hexad[[.x]],
-  merged_hexad$total_score - merged_hexad[[.x]],
-  use = "pairwise.complete.obs"
-))
-names(item_total_corrs) <- item_cols
+Correlations between Hexad determinants and gaming frequency
 
+#### Appendix A19. Kruskal–Wallis test for Hexad determinants by gaming frequency
 
+| Determinant    | n_total | n_groups | statistic |  df | p_value |
+|:---------------|--------:|---------:|----------:|----:|--------:|
+| achiever       |     648 |        3 |      2.03 |   2 |   0.362 |
+| disruptor      |     648 |        3 |      3.63 |   2 |   0.163 |
+| freeSpirit     |     648 |        3 |      5.72 |   2 |   0.057 |
+| philanthropist |     648 |        3 |      0.93 |   2 |   0.627 |
+| player         |     648 |        3 |      1.07 |   2 |   0.586 |
+| socializer     |     648 |        3 |      2.14 |   2 |   0.343 |
 
-kable(item_total_corrs, caption = "Item–total correlation for each subscale",digits  = 2)
-```
+Kruskal–Wallis test for Hexad determinants by gaming frequency
 
-|     |    x |
-|:----|-----:|
-| A2  | 0.33 |
-| A4  | 0.40 |
-| D3  | 0.11 |
-| D4  | 0.09 |
-| F1  | 0.49 |
-| F3  | 0.44 |
-| P1  | 0.50 |
-| P4  | 0.38 |
-| R2  | 0.35 |
-| R4  | 0.33 |
-| S2  | 0.40 |
-| S4  | 0.39 |
+#### Multigroup Confirmatory factor Analysis
 
-Item–total correlation for each subscale
+    ## 
+    ## 1-2 days 3-4 days 5-7 days     <NA> 
+    ##      379      133      136      218
 
-``` r
-# install.packages(c("ggplot2","diptest","tidyr","dplyr","purrr"))
-library(ggplot2)
-library(diptest)
-library(tidyr)
-library(dplyr)
-library(purrr)
+    ## 
+    ## 1-2 days 3-4 days 5-7 days 
+    ##      379      133      136
 
-# 1. Define your 12 item columns and subset
-item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
-df_items <- merged_hexad[, item_cols]
+    ## [1] 648
 
-# 2. Reshape to long format for plotting
-df_long <- df_items %>%
-  pivot_longer(cols      = everything(),
-               names_to  = "item",
-               values_to = "score")
+    ## 
+    ## Scaled Chi-Squared Difference Test (method = "satorra.bentler.2001")
+    ## 
+    ## lavaan->lavTestLRT():  
+    ##    lavaan NOTE: The "Chisq" column contains standard test statistics, not the 
+    ##    robust test that should be reported per model. A robust difference test is 
+    ##    a function of two standard (not robust) statistics.
+    ##             Df   AIC   BIC  Chisq Chisq diff Df diff Pr(>Chisq)  
+    ## fit_config 117 24902 25587 152.87                                
+    ## fit_metric 129 24910 25541 184.59     22.936      12    0.02828 *
+    ## fit_scalar 141 24905 25482 203.73     19.524      12    0.07664 .
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-# 3. Faceted histograms
-ggplot(df_long, aes(x = score)) +
-  geom_histogram(bins = 30, color = "black", fill = "lightblue") +
-  facet_wrap(~ item, scales = "free") +
-  labs(title = "Hexad-12 Item Distributions",
-       x     = "Response",
-       y     = "Count") +
-  theme_minimal()
-```
+    ##          cfi rmsea  srmr
+    ## config 0.984 0.038 0.037
+    ## metric 0.975 0.045 0.043
+    ## scalar 0.971 0.045 0.044
 
-![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+### Gender-related patterns in Hexad-12 scores.
 
-``` r
-#––– 1. Load libraries
-library(moments)    # for skewness() and kurtosis()
-library(multimode)  # for silverman.test()
-library(dplyr)      # for data manipulation
-library(tidyr)      # if you later want to reshape for plots
-library(purrr)      # for map functions
-library(ggplot2)    # for any plotting
+#### Appendix A20. Kruskal–Wallis test for Hexad determinants by Gender
 
+    ## [1] 628  26
 
-for(it in item_cols) {
-  x <- na.omit(merged_hexad[[it]])
-  # Silverman’s test (mod0=1 ⇒ test unimodality vs. multimodality)
-  si <- modetest(x, mod0 = 1, method = "SI", B = 10000)
-  
-  cat(sprintf(
-    "%-3s  bw = %.3f  p = %.3f\n",
-    it,
-    si$statistic,   # critical bandwidth
-    si$p.value      # p-value
-  ))
-}
-```
+| Determinant    |   n | n_groups | statistic |  df | p_value |
+|:---------------|----:|---------:|----------:|----:|--------:|
+| philanthropist | 628 |        3 |      7.76 |   2 |   0.021 |
+| socializer     | 628 |        3 |      0.13 |   2 |   0.937 |
+| freeSpirit     | 628 |        3 |      5.87 |   2 |   0.053 |
+| achiever       | 628 |        3 |      5.07 |   2 |   0.079 |
+| player         | 628 |        3 |      0.38 |   2 |   0.826 |
+| disruptor      | 628 |        3 |      3.06 |   2 |   0.217 |
 
-    ## A2   bw = 0.520  p = 0.278
-    ## A4   bw = 0.589  p = 0.475
-    ## D3   bw = 1.079  p = 0.007
-    ## D4   bw = 1.279  p = 0.024
-    ## F1   bw = 0.685  p = 0.157
-    ## F3   bw = 0.668  p = 0.185
-    ## P1   bw = 0.837  p = 0.099
-    ## P4   bw = 0.542  p = 0.334
-    ## R2   bw = 0.421  p = 0.353
-    ## R4   bw = 0.571  p = 0.307
-    ## S2   bw = 0.685  p = 0.013
-    ## S4   bw = 0.652  p = 0.022
+Kruskal–Wallis test for Hexad determinants by Gender
+
+#### Multigroup Confirmatory factor Analysis
+
+    ## 
+    ## Female   Male 
+    ##    369    256
+
+    ## [1] 625
+
+    ## 
+    ## Scaled Chi-Squared Difference Test (method = "satorra.bentler.2001")
+    ## 
+    ## lavaan->lavTestLRT():  
+    ##    lavaan NOTE: The "Chisq" column contains standard test statistics, not the 
+    ##    robust test that should be reported per model. A robust difference test is 
+    ##    a function of two standard (not robust) statistics.
+    ##            Df   AIC   BIC   Chisq Chisq diff Df diff Pr(>Chisq)   
+    ## fit_config 78 23961 24414  99.598                                 
+    ## fit_metric 84 23955 24381 105.049      3.658       6   0.722839   
+    ## fit_scalar 90 23961 24360 123.042     19.016       6   0.004137 **
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    ##          cfi rmsea  srmr
+    ## config 0.988 0.030 0.030
+    ## metric 0.988 0.028 0.033
+    ## scalar 0.982 0.034 0.035
+
+### Age-related patterns in Hexad-12 scores.
+
+#### Appendix A21. Correlations between Hexad determinants and Age
+
+| Determinant    |   n |    tau | p_value |
+|:---------------|----:|-------:|--------:|
+| philanthropist | 737 |  0.143 |   0.000 |
+| socializer     | 737 |  0.062 |   0.020 |
+| freeSpirit     | 737 |  0.018 |   0.517 |
+| achiever       | 737 |  0.006 |   0.828 |
+| player         | 737 | -0.098 |   0.000 |
+| disruptor      | 737 | -0.005 |   0.839 |
+
+Correlations between Hexad determinants and Age
+
+#### Appendix A22. Kruskal–Wallis test for Hexad determinants by Age Group
+
+| Determinant    |   n | n_groups | statistic |  df | p_value |
+|:---------------|----:|---------:|----------:|----:|--------:|
+| philanthropist | 737 |        4 |     33.01 |   3 |   0.000 |
+| socializer     | 737 |        4 |      4.94 |   3 |   0.176 |
+| freeSpirit     | 737 |        4 |      7.29 |   3 |   0.063 |
+| achiever       | 737 |        4 |      9.26 |   3 |   0.026 |
+| player         | 737 |        4 |     22.11 |   3 |   0.000 |
+| disruptor      | 737 |        4 |      0.14 |   3 |   0.987 |
+
+Kruskal–Wallis test for Hexad determinants by Age Group
+
+#### Dunn post-hoc tests
+
+    ## [1] "philanthropist" "player"
+
+    ## # A tibble: 12 × 5
+    ##    Determinant    Comparison          Z P.unadj   P.adj
+    ##    <chr>          <chr>           <dbl>   <dbl>   <dbl>
+    ##  1 philanthropist 18–24 - 25–34 -3.80   0.00014 0.00043
+    ##  2 philanthropist 18–24 - 35–49 -3.74   0.00019 0.00037
+    ##  3 philanthropist 25–34 - 35–49 -0.161  0.872   0.872  
+    ##  4 philanthropist 18–24 - 50+   -5.43   0       0      
+    ##  5 philanthropist 25–34 - 50+   -1.48   0.138   0.207  
+    ##  6 philanthropist 35–49 - 50+   -1.23   0.217   0.261  
+    ##  7 player         18–24 - 25–34 -0.954  0.340   0.510  
+    ##  8 player         18–24 - 35–49 -0.0417 0.967   0.967  
+    ##  9 player         25–34 - 35–49  0.820  0.412   0.495  
+    ## 10 player         18–24 - 50+    3.56   0.00037 0.00112
+    ## 11 player         25–34 - 50+    4.32   0.00002 0.00009
+    ## 12 player         35–49 - 50+    3.24   0.0012  0.00241
+
+#### Multigroup Confirmatory factor Analysis
+
+    ## 
+    ## 18–24 25–34 35–49   50+ 
+    ##   219   180   145   193
+
+    ##             Df      AIC      BIC   Chisq Chisq diff Df diff Pr(>Chisq)
+    ## fit_config 156 28359.83 29298.76 233.285         NA      NA         NA
+    ## fit_metric 174 28361.49 29217.57 270.942     20.452      18    0.30795
+    ## fit_scalar 192 28366.05 29139.28 311.501     40.431      18    0.00182
+
+    ##    Model   cfi rmsea  srmr
+    ## 1 config 0.968 0.052 0.043
+    ## 2 metric 0.960 0.055 0.050
+    ## 3 scalar 0.951 0.058 0.054
+
+## Country-related patterns in Hexad-12 scores.
+
+#### Appendix A23. Kruskal–Wallis test for Hexad determinants by top 10 countries
+
+| Determinant    |   n | n_groups | statistic |  df | p_value |
+|:---------------|----:|---------:|----------:|----:|--------:|
+| philanthropist | 669 |       10 |     16.17 |   9 |   0.063 |
+| socializer     | 669 |       10 |     15.83 |   9 |   0.070 |
+| freeSpirit     | 669 |       10 |      6.53 |   9 |   0.686 |
+| achiever       | 669 |       10 |     21.76 |   9 |   0.010 |
+| player         | 669 |       10 |     13.42 |   9 |   0.145 |
+| disruptor      | 669 |       10 |     11.68 |   9 |   0.232 |
+
+Kruskal–Wallis test for Hexad determinants by Age Group
+
+#### Multigroup Confirmatory factor Analysis
+
+    ## 
+    ## Counts per Region3:
+
+    ## 
+    ## Central_America_Mex_Caribbean               Northern_Andean 
+    ##                           108                           308 
+    ##                 Southern_Cone 
+    ##                           253
+
+    ## 
+    ## Scaled Chi-Squared Difference Test (method = "satorra.bentler.2001")
+    ## 
+    ## lavaan->lavTestLRT():  
+    ##    lavaan NOTE: The "Chisq" column contains standard test statistics, not the 
+    ##    robust test that should be reported per model. A robust difference test is 
+    ##    a function of two standard (not robust) statistics.
+    ##             Df   AIC   BIC  Chisq Chisq diff Df diff Pr(>Chisq)
+    ## fit_config 117 25592 26281 154.93                              
+    ## fit_metric 129 25582 26217 168.79      8.837      12     0.7168
+    ## fit_scalar 141 25570 26151 181.12     12.847      12     0.3803
+
+    ## 
+    ## Fit Indices (Robust):
+
+    ##          CFI RMSEA  SRMR
+    ## config 0.981 0.037 0.034
+    ## metric 0.983 0.033 0.037
+    ## scalar 0.983 0.032 0.039
