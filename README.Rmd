@@ -1,9 +1,7 @@
 ---
-title: "README"
-output: 
-  github_document:
-    pandoc_args: ["--wrap=none"]
-always_allow_html: true
+title: "Data Analysis Hexad-12 Spanish"
+output: html_document
+date: "2025-11-28"
 ---
 
 ```{r setup, echo = FALSE}
@@ -52,7 +50,6 @@ num_bootstrap <- 10000 # Number of bootstrap samples
 ```
 
 
-Download that from GitHub Repo: https://github.com/
 ```{r}
 # Define the GitHub raw CSV URL
 #github_url <- "https://raw.githubusercontent.com//Hexad-/refs/heads/main/Hexad_12_Spanish_data.csv"
@@ -70,17 +67,21 @@ data<-read.csv("Hexad_12_Spanish_data.csv")
 # Display the first few rows of the data frame
 head(data)
 ```
-# 4. Results 
 
-## 4.2. Sample descriptives
+# 4. Results
+
+## Sample descriptives
 
 ### Number of Participants
+
 Each row represents a data point from a single participant. Total number of participants
+
 ```{r}
 print(nrow(data))
 ```
 
-### Completion Time Summary statistics 
+### Completion Time Summary statistics
+
 ```{r}
 # Ensure Completion.Time is numeric
 data$Completion.Time <- as.numeric(data$Completion.Time)
@@ -102,8 +103,8 @@ summary_table <- data.frame(
 kable(summary_table, caption = "Summary Statistics for Completion Time")
 ```
 
+### Age Summary statistics
 
-### Age Summary statistics 
 ```{r}
 data$Age <- as.numeric(data$Age)
 
@@ -124,8 +125,8 @@ summary_table <- data.frame(
 kable(summary_table, caption = "Summary Statistics for Age")
 ```
 
+### Gender Summary statistics
 
-### Gender Summary statistics 
 ```{r}
 # Encode Gender as a factor with specific levels
 gender_labels <- c("female", "male", "other")
@@ -148,8 +149,8 @@ kable(gender_summary_table, caption = "Summary of Gender Distribution with Total
 
 ```
 
+### Education Level Summary statistics
 
-### Education Level Summary statistics 
 ```{r}
 # Encode Education Level as a factor with specific levels
 educationlevel_labels <- c(
@@ -180,8 +181,8 @@ education_summary_table <- data.frame(
 kable(education_summary_table, caption = "Summary of Education Level Distribution with Totals")
 ```
 
+### Game frequency Summary statistics
 
-### Game frequency Summary statistics 
 ```{r}
 data$Freq.Games <- as.numeric(data$Freq.Games)
 
@@ -202,7 +203,8 @@ summary_table <- data.frame(
 kable(summary_table, caption = "Summary Statistics for Frequency of Play")
 ```
 
-### Country of Origin Summary statistics 
+### Country of Origin Summary statistics
+
 ```{r}
 # Filter the data to exclude empty Country values
 filtered_data <- data$Country[data$Country != ""]
@@ -224,11 +226,10 @@ kable(head(summary_table,11), caption = "Summary of Country Distribution with To
 
 ```
 
+### Hexad determinants Summary statistics
 
+#### Table 4. Summary Statistics of Hexad-12 determinants (N = 866)
 
-### Hexad determinants Summary statistics 
-
-#### Table 3. Summary Statistics of Hexad-12 determinants (N = 866)
 ```{r}
 
 
@@ -264,8 +265,8 @@ kable(summary_stats,
 
 ```
 
+#### Figure 1: Violin plot of Hexad determinant distributions
 
-#### Figure 2: Violin plot of Hexad determinant distributions
 ```{r}
 
 library(tidyverse)
@@ -290,33 +291,274 @@ hexad_long <- data %>%
     Determinant = fct_reorder(Determinant, Score, .fun = mean, .desc = TRUE)
   )
 
-# ---- full violin + slim boxplot + jittered points --------------------------
-g<-ggplot(hexad_long, aes(x = Determinant, y = Score, fill = Determinant)) +
-  # wider violin
-  geom_violin(trim = FALSE, width = 1.0, alpha = 0.6) +
-  # ultra-thin box in the center
-  geom_boxplot(width = 0.08, fill = "white", outlier.shape = NA) +
-  # jittered raw points
-  geom_jitter(aes(color = Determinant+1),
-              width = 0.1, height = 0.1,
-              size = 1, alpha = 0.2,
-              show.legend = FALSE) +
-  scale_y_continuous(limits = c(1, 14), breaks = seq(2, 14, 2)) +
-  guides(fill = FALSE) +
+```
+```{r}
+library(tidyverse)
+library(gghalves)
+library(dplyr)
+library(forcats)
+
+# ---- Reshape to long form ---------------------------------------------------
+hexad_long <- data %>%
+  dplyr::select(
+    Philanthropist = philanthropist,
+    Socializer     = socializer,
+    `Free Spirit`  = freeSpirit,
+    Achiever       = achiever,
+    Player         = player,
+    Disruptor      = disruptor
+  ) %>%
+  pivot_longer(
+    cols      = everything(),
+    names_to  = "Determinant",
+    values_to = "Score"
+  ) %>%
+  mutate(
+    Determinant = fct_reorder(
+      Determinant,
+      Score,
+      .fun = mean,
+      .desc = TRUE,
+      na.rm = TRUE
+    )
+  )
+
+# ---- Violin plot, boxplot, and jittered observations ------------------------
+g <- ggplot(
+  hexad_long,
+  aes(x = Determinant, y = Score, fill = Determinant)
+) +
+  geom_violin(
+    trim = FALSE,
+    width = 0.95,
+    alpha = 0.60,
+    linewidth = 0.5
+  ) +
+  geom_boxplot(
+    width = 0.10,
+    fill = "white",
+    linewidth = 0.7,
+    outlier.shape = NA
+  ) +
+  geom_jitter(
+    aes(color = Determinant),
+    width = 0.10,
+    height = 0.08,
+    size = 1.2,
+    alpha = 0.18,
+    show.legend = FALSE
+  ) +
+  scale_y_continuous(
+    limits = c(2, 14),
+    breaks = seq(2, 14, by = 2),
+    minor_breaks = NULL,
+    expand = expansion(mult = c(0.01, 0.03))
+  ) +
+  guides(fill = "none") +
   labs(
     title = "Distribution of Hexad Motivational Determinants",
-    x     = NULL,
-    y     = "Score (0–14)"
+    x = NULL,
+    y = "Summed determinant score (2–14)"
   ) +
-  theme_minimal(base_size = 12) +
-  theme(panel.grid.major.x = element_blank())
+  theme_classic(base_size = 16) +
+  theme(
+    # Figure title
+    plot.title = element_text(
+      size = 18,
+      face = "bold",
+      hjust = 0.5,
+      margin = margin(b = 14)
+    ),
+
+    # Axis title
+    axis.title.y = element_text(
+      size = 16,
+      face = "bold",
+      margin = margin(r = 12)
+    ),
+
+    # Axis tick labels
+    axis.text.x = element_text(
+      size = 14,
+      face = "bold",
+      angle = 0,
+      hjust = 0.5,
+      margin = margin(t = 8)
+    ),
+    axis.text.y = element_text(
+      size = 14,
+      face = "bold"
+    ),
+
+    # Axis ticks and lines
+    axis.ticks = element_line(linewidth = 0.7),
+    axis.ticks.length = unit(0.18, "cm"),
+    axis.line = element_line(linewidth = 0.8),
+
+    # Add horizontal guides while keeping the figure uncluttered
+    panel.grid.major.y = element_line(
+      linewidth = 0.35,
+      linetype = "dashed"
+    ),
+    panel.grid.major.x = element_blank(),
+
+    # Margins around the complete figure
+    plot.margin = margin(
+      t = 12,
+      r = 14,
+      b = 12,
+      l = 14
+    )
+  )
 
 print(g)
+
+# ---- Export at publication quality -----------------------------------------
+ggsave(
+  filename = "Figure2_Hexad_distributions.png",
+  plot = g,
+  width = 9,
+  height = 6,
+  units = "in",
+  dpi = 600,
+  bg = "white"
+)
+
+# Optional vector version, useful if accepted by the journal
+ggsave(
+  filename = "Figure2_Hexad_distributions.pdf",
+  plot = g,
+  width = 9,
+  height = 6,
+  units = "in",
+  device = cairo_pdf
+)
 ```
 
 ### Summary statistics for all Hexad-12 determinants across key subgroups
 
+
+#### Appendix A1. Distribution of Hexad determinants by Age Group
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Hexad determinants
+hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+# Create age groups
+data_age <- data %>%
+  filter(!is.na(Age)) %>%                 
+  mutate(
+    AgeGroup = case_when(
+      Age >= 18 & Age <= 24 ~ "18–24",
+      Age >= 25 & Age <= 34 ~ "25–34",
+      Age >= 35 & Age <= 49 ~ "35–49",
+      Age >= 50             ~ "50+"
+    )
+  ) %>%
+  filter(!is.na(AgeGroup))
+
+# Summaries per age group
+hexad_by_age <- data_age %>%
+  group_by(AgeGroup) %>%
+  summarise(
+    N = n(),
+    across(
+      all_of(hexad_vars),
+      list(
+        Mean   = ~mean(., na.rm = TRUE),
+        Median = ~median(., na.rm = TRUE),
+        Min    = ~min(., na.rm = TRUE),
+        Max    = ~max(., na.rm = TRUE),
+        SD     = ~sd(., na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  ) %>%
+  # Round all numeric columns except N
+  mutate(across(where(is.numeric) & !matches("^N$"), ~round(.x, 2)))
+
+# Flip table so rows = stats, columns = age groups
+hexad_by_age_flipped <- hexad_by_age %>%
+  pivot_longer(
+    cols = -AgeGroup,
+    names_to = "Measure",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = AgeGroup,
+    values_from = Value
+  )
+
+
+
+
+kable(hexad_by_age_flipped, 
+      caption = " Distribution of Hexad determinants by Age Group", 
+      digits  = 2)
+```
+
+#### Appendix A2. Distribution of Hexad determinants by Gender
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Hexad determinants
+hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+# Summaries by Gender (exclude missing Gender)
+hexad_by_gender <- data %>%
+  filter(!is.na(Gender)) %>%      # drop NA genders
+  group_by(Gender) %>%
+  summarise(
+    N = n(),                      # sample size per gender
+    across(
+      all_of(hexad_vars),
+      list(
+        Mean   = ~mean(., na.rm = TRUE),
+        Median = ~median(., na.rm = TRUE),
+        Min    = ~min(., na.rm = TRUE),
+        Max    = ~max(., na.rm = TRUE),
+        SD     = ~sd(., na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  ) %>%
+  # Round all numeric columns except N
+  mutate(across(where(is.numeric) & !matches("^N$"), ~round(.x, 2)))
+
+# Flip table so:
+#    - Rows = N, philanthropist_Mean, ..., disruptor_SD
+#    - Columns = Gender values
+hexad_by_gender_flipped <- hexad_by_gender %>%
+  pivot_longer(
+    cols = -Gender,
+    names_to = "Measure",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = Gender,
+    values_from = Value
+  )
+
+
+
+kable(hexad_by_gender_flipped, 
+      caption = "Distribution of Hexad determinants by Gender", 
+      digits  = 2)
+
+```
+
+
 #### Appendix A3. Distribution of Hexad determinants by Education
+
 ```{r}
 library(dplyr)
 library(tidyr)
@@ -366,8 +608,72 @@ kable(hexad_by_edu_flipped,
 
 ```
 
+#### Apendix A4. Distribution of Hexad determinants by Weekly Gaming Frequency
 
-#### Appendix A4. Distribution of Hexad items by Country
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Hexad determinants
+hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
+                "achiever", "player", "disruptor")
+
+# Create game-frequency groups
+data_freq <- data %>%
+  filter(!is.na(Freq.Games)) %>%  
+  mutate(
+    FreqGroup = case_when(
+      Freq.Games >= 1 & Freq.Games <= 2 ~ "1–2 days",
+      Freq.Games >= 3 & Freq.Games <= 4 ~ "3–4 days",
+      Freq.Games >= 5 & Freq.Games <= 7 ~ "5–7 days"
+    )
+  ) %>%
+  filter(!is.na(FreqGroup))
+
+# Summaries per frequency group
+hexad_by_freq <- data_freq %>%
+  group_by(FreqGroup) %>%
+  summarise(
+    N = n(),
+    across(
+      all_of(hexad_vars),
+      list(
+        Mean   = ~mean(., na.rm = TRUE),
+        Median = ~median(., na.rm = TRUE),
+        Min    = ~min(., na.rm = TRUE),
+        Max    = ~max(., na.rm = TRUE),
+        SD     = ~sd(., na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    ),
+    .groups = "drop"
+  ) %>%
+  mutate(across(where(is.numeric) & !all_of("N"), ~round(.x, 2)))
+
+# Flip table: rows = stats, columns = freq groups
+hexad_by_freq_flipped <- hexad_by_freq %>%
+  pivot_longer(
+    cols = -FreqGroup,
+    names_to  = "Measure",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from  = FreqGroup,
+    values_from = Value
+  )
+
+
+
+
+kable(hexad_by_freq_flipped, 
+      caption = " Distribution of Hexad determinants by Weekly Gaming Frequency", 
+      digits  = 2)
+
+```
+
+
+#### Appendix A5. Distribution of Hexad items by Country
+
 ```{r}
 #Shorten Countries Name for easy of tables
 data[data$Country=="Bolivia (Estado Plurinacional de)", 'Country' ]<-"Bolivia"
@@ -448,188 +754,31 @@ hexad_summary_t %>%
 ```
 
 
-#### Appendix A5. Distribution of Hexad determinants by Gender
+## 4.1 Item-level diagnostics
+
+#### Appendix A8. Summary Statistics per item
+
 ```{r}
-library(dplyr)
-library(tidyr)
 
-# Hexad determinants
-hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
-                "achiever", "player", "disruptor")
+merged_hexad<-data
+item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
+df_items  <- merged_hexad[ , item_cols ]
 
-# Summaries by Gender (exclude missing Gender)
-hexad_by_gender <- data %>%
-  filter(!is.na(Gender)) %>%      # drop NA genders
-  group_by(Gender) %>%
-  summarise(
-    N = n(),                      # sample size per gender
-    across(
-      all_of(hexad_vars),
-      list(
-        Mean   = ~mean(., na.rm = TRUE),
-        Median = ~median(., na.rm = TRUE),
-        Min    = ~min(., na.rm = TRUE),
-        Max    = ~max(., na.rm = TRUE),
-        SD     = ~sd(., na.rm = TRUE)
-      ),
-      .names = "{.col}_{.fn}"
-    ),
-    .groups = "drop"
-  ) %>%
-  # Round all numeric columns except N
-  mutate(across(where(is.numeric) & !matches("^N$"), ~round(.x, 2)))
+# Descriptive statistics
+desc_stats <- describe(df_items)
 
-# Flip table so:
-#    - Rows = N, philanthropist_Mean, ..., disruptor_SD
-#    - Columns = Gender values
-hexad_by_gender_flipped <- hexad_by_gender %>%
-  pivot_longer(
-    cols = -Gender,
-    names_to = "Measure",
-    values_to = "Value"
-  ) %>%
-  pivot_wider(
-    names_from = Gender,
-    values_from = Value
-  )
+kable(desc_stats, caption = "Summary Statistics per item",digits  = 2)
 
 
 
-kable(hexad_by_gender_flipped, 
-      caption = "Distribution of Hexad determinants by Gender", 
-      digits  = 2)
+
 
 ```
 
-#### Appendix A6. Distribution of Hexad determinants by Age Group
-
-```{r}
-library(dplyr)
-library(tidyr)
-
-# Hexad determinants
-hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
-                "achiever", "player", "disruptor")
-
-# Create age groups
-data_age <- data %>%
-  filter(!is.na(Age)) %>%                 
-  mutate(
-    AgeGroup = case_when(
-      Age >= 18 & Age <= 24 ~ "18–24",
-      Age >= 25 & Age <= 34 ~ "25–34",
-      Age >= 35 & Age <= 49 ~ "35–49",
-      Age >= 50             ~ "50+"
-    )
-  ) %>%
-  filter(!is.na(AgeGroup))
-
-# Summaries per age group
-hexad_by_age <- data_age %>%
-  group_by(AgeGroup) %>%
-  summarise(
-    N = n(),
-    across(
-      all_of(hexad_vars),
-      list(
-        Mean   = ~mean(., na.rm = TRUE),
-        Median = ~median(., na.rm = TRUE),
-        Min    = ~min(., na.rm = TRUE),
-        Max    = ~max(., na.rm = TRUE),
-        SD     = ~sd(., na.rm = TRUE)
-      ),
-      .names = "{.col}_{.fn}"
-    ),
-    .groups = "drop"
-  ) %>%
-  # Round all numeric columns except N
-  mutate(across(where(is.numeric) & !matches("^N$"), ~round(.x, 2)))
-
-# Flip table so rows = stats, columns = age groups
-hexad_by_age_flipped <- hexad_by_age %>%
-  pivot_longer(
-    cols = -AgeGroup,
-    names_to = "Measure",
-    values_to = "Value"
-  ) %>%
-  pivot_wider(
-    names_from = AgeGroup,
-    values_from = Value
-  )
 
 
+#### Appendix A9. Mardia’s multivariate normality test for Hexad-12 items
 
-
-kable(hexad_by_age_flipped, 
-      caption = " Distribution of Hexad determinants by Age Group", 
-      digits  = 2)
-```
-
-#### Apendix A7. Distribution of Hexad determinants by Weekly Gaming Frequency
-```{r}
-library(dplyr)
-library(tidyr)
-
-# Hexad determinants
-hexad_vars <- c("philanthropist", "socializer", "freeSpirit",
-                "achiever", "player", "disruptor")
-
-# Create game-frequency groups
-data_freq <- data %>%
-  filter(!is.na(Freq.Games)) %>%  
-  mutate(
-    FreqGroup = case_when(
-      Freq.Games >= 1 & Freq.Games <= 2 ~ "1–2 days",
-      Freq.Games >= 3 & Freq.Games <= 4 ~ "3–4 days",
-      Freq.Games >= 5 & Freq.Games <= 7 ~ "5–7 days"
-    )
-  ) %>%
-  filter(!is.na(FreqGroup))
-
-# Summaries per frequency group
-hexad_by_freq <- data_freq %>%
-  group_by(FreqGroup) %>%
-  summarise(
-    N = n(),
-    across(
-      all_of(hexad_vars),
-      list(
-        Mean   = ~mean(., na.rm = TRUE),
-        Median = ~median(., na.rm = TRUE),
-        Min    = ~min(., na.rm = TRUE),
-        Max    = ~max(., na.rm = TRUE),
-        SD     = ~sd(., na.rm = TRUE)
-      ),
-      .names = "{.col}_{.fn}"
-    ),
-    .groups = "drop"
-  ) %>%
-  mutate(across(where(is.numeric) & !all_of("N"), ~round(.x, 2)))
-
-# Flip table: rows = stats, columns = freq groups
-hexad_by_freq_flipped <- hexad_by_freq %>%
-  pivot_longer(
-    cols = -FreqGroup,
-    names_to  = "Measure",
-    values_to = "Value"
-  ) %>%
-  pivot_wider(
-    names_from  = FreqGroup,
-    values_from = Value
-  )
-
-
-
-
-kable(hexad_by_freq_flipped, 
-      caption = " Distribution of Hexad determinants by Weekly Gaming Frequency", 
-      digits  = 2)
-
-```
-
-## 4.3. Distributional checks
-
-#### Appendix A8. Mardia’s multivariate normality test for Hexad-12 items 
 ```{r}
 
 # Perform Mardia's test for multivariate normality
@@ -657,30 +806,8 @@ mardia_results %>%
 
 ```
 
-
-
-## 4.4. Item-level diagnostics
-
-#### Appendix A9. Summary Statistics per item
-```{r}
-
-merged_hexad<-data
-item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
-df_items  <- merged_hexad[ , item_cols ]
-
-# Descriptive statistics
-desc_stats <- describe(df_items)
-
-kable(desc_stats, caption = "Summary Statistics per item",digits  = 2)
-
-
-
-
-
-```
-
-
 #### Appendix A10. Response distributions for each Hexad-12 item
+
 ```{r}
 
 item_cols <- c("A2","A4","D3","D4","F1","F3","P1","P4","R2","R4","S2","S4")
@@ -704,9 +831,8 @@ ggplot(df_long, aes(x = score)) +
 
 ```
 
-
-
 #### Appendix A11. Multimodality Silverman tests results
+
 ```{r, cache=TRUE}
 
 
@@ -726,7 +852,6 @@ for(it in item_cols) {
 }
 ```
 
-
 #### Appendix A12. Item–total correlation for each subscale
 
 ```{r}
@@ -745,10 +870,10 @@ names(item_total_corrs) <- item_cols
 kable(item_total_corrs, caption = "Item–total correlation for each subscale",digits  = 2)
 ```
 
-## 4.5. Confirmatory Factor Analysis
+## 4.2. Confirmatory Factor Analysis
 
+#### Table 5: Estimated factor loadings for Hexad-12 items
 
-#### Table 4: Estimated factor loadings for Hexad-12 items
 ```{r}
 # Specify the CFA model
 cfa_model <- '
@@ -761,7 +886,7 @@ cfa_model <- '
 '
 
 # Fit the CFA model
-fit <- cfa(cfa_model, data = data,std.lv=TRUE, auto.efa = TRUE, estimator = "WLSMV")
+fit <- cfa(cfa_model, data = data,std.lv=TRUE, estimator = "WLSMV")  #auto.efa = TRUE
  #
 # Global Fit Metrics
 results<-summary(fit, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
@@ -795,8 +920,79 @@ fit <- cfa(model, data = merged_hexad, estimator = "WLSMV")
 #summary(fit, fit.measures = TRUE, standardized = TRUE)
 ```
 
+#### Figure 2. Standardized CFA model
 
-####  CFA  fit indices with 95% CI using  bootstrapping with 10,000 samples  (Table 5)
+```{r}
+pdf(
+  "Hexad12_CFA_plot.pdf",
+  width = 14,
+  height = 14,
+  family = "sans"
+)
+
+semPlot::semPaths(
+  fit,
+
+  # Uniform paths with standardized coefficient labels
+  what = "paths",
+  whatLabels = "std",
+  nDigits = 2,
+
+  # Layout
+  layout = "tree2",
+  rotation = 2,
+  centerLevels = TRUE,
+  cardinal = "all",
+
+  # More vertical space between levels/rows
+  layoutScale = c(1.20, 1.70),
+
+  # Remove unnecessary model elements
+  residuals = FALSE,
+  intercepts = FALSE,
+  thresholds = FALSE,
+  exoVar = FALSE,
+  exoCov = FALSE,
+
+  # Nodes and text
+  nCharNodes = 0,
+  sizeMan = 9,
+  sizeLat = 13,
+  label.cex = 1.25,
+  label.scale.equal = TRUE,
+
+  # Node appearance
+  color = list(lat = "white", man = "white"),
+  borders = TRUE,
+  border.width = 1.5,
+
+  # Force all paths to be solid black
+  edge.color = "black",
+  edge.width = 1.3,
+  fixedStyle = c("black", 1),
+  freeStyle = c("black", 1),
+  negDashed = FALSE,
+  fade = FALSE,
+  curve = 0,
+
+  # Arrows
+  asize = 2,
+  arrowAngle = pi / 8,
+
+  # Coefficient labels
+  edge.label.cex = 1.10,
+  edge.label.position = 0.58,
+  edge.label.color = "black",
+
+  title = FALSE,
+  mar = c(10, 8, 10, 8)
+)
+
+dev.off()
+```
+
+#### Table 6: CFA fit indices with 95% CI using bootstrapping with 10,000 samples
+
 ```{r, cache=TRUE}
 
 
@@ -882,12 +1078,12 @@ results_table %>%
 
 ```
 
-
-####  CFA  fit indices with 95% CI using  bootstrapping with 10,000 samples (Sensitivy analysis:without "fast_responders"  < 52.28sec )
+######## Table 6: CFA fit indices with 95% CI using bootstrapping with 10,000 samples (Sensitivy analysis:without "fast_responders" \< 52.28sec )
 
 ```{r, cache=TRUE}
 
 hexad_data_52<-data[data$Completion.Time>52.28, ]
+dim(hexad_data_52)
 # Function to take a bootstrap sample and perform CFA, returning CR, Omega, and AVE
 bootstrap_cfa_cr_omega_ave <- function(data, cfa_model) {
   # Generate a bootstrap sample (with replacement)
@@ -962,8 +1158,8 @@ results_table_52[1:5,] %>%
 
 ```
 
-
 #### Appendix A13. Standardized Residuals for the Hexad-12 items from the CFA
+
 ```{r}
 # Local Fit: Residuals  Standardized residuals
 standardized_residuals <- residuals(fit, type = "standardized")
@@ -974,6 +1170,7 @@ kable(standardized_residuals, caption = "Standardized Residuals for the Hexad-12
 ```
 
 #### Appendix A14. Correlation Residuals for the Hexad-12 items from the CFA
+
 ```{r}
 #Correlation residuals
 
@@ -999,10 +1196,10 @@ kable(head(table_MI, 10), caption = " Modification indices Hexad-12 scale",digit
 
 ```
 
+## 4.3. Score Reliability
 
-## 4.6. Reliability
+#### Table 7: Reliability metrics
 
-#### Table 5: Reliability metrics
 ```{r, cache=TRUE}
 
 
@@ -1135,6 +1332,7 @@ final_table <- bind_rows(final_results)
 kable(t(as.matrix(final_table)), caption = " Reliability Table for  Hexad-12 Subscales", digits = 3)
 
 ```
+
 ```{r}
 
 
@@ -1237,12 +1435,12 @@ ordinal_cr_results <- data.frame(
 )
 
 
-kable(ordinal_cr_results, caption = " Oridinal CR for  Hexad-12 Subscales", digits = 3)
+kable(ordinal_cr_results, caption = " Ordinal CR for  Hexad-12 Subscales", digits = 3)
 
 
 ```
 
-## 4.7. Convergent and discriminant validity
+## 4.4.Internal-Structure Evidence
 
 #### Appendix A16. Heterotrait–Monotrait (HTMT) ratios
 
@@ -1349,7 +1547,7 @@ cat("\nMaximum HTMT:", round(HTMT_max, 3),
     " | Lenient OK (< .90)?", HTMT_max < .90, "\n\n")
 
 
-R_boot <- num_bootstrap   # use 10000 for final paper
+R_boot <- num_bootstrap   
 HTMT_cube <- array(NA_real_, dim = c(length(blocks), length(blocks), R_boot),
                    dimnames = list(fac_names, fac_names, NULL))
 
@@ -1395,8 +1593,8 @@ print(knitr::kable(
 
 ```
 
+#### Table 8: Bivariate correlation coefficients Kendall's tau between the Hexad subscales
 
-#### Table 6 Bivariate correlation coefficients Kendall's tau between the Hexad subscales
 ```{r}
 
 # Reorganize columns in the desired order
@@ -1429,8 +1627,8 @@ for (i in 1:n) {
 
 # Convert the correlation matrix to a data frame for display
 cor_matrix_df <- as.data.frame(cor_matrix, row.names = columns)
-rownames(cor_matrix_df) <- c("Philanthropic", "Socializer", "Achiever", "Player", "Disruptor", "Free Spirit")
-colnames(cor_matrix_df) <- c("Philanthropic", "Socializer", "Achiever", "Player", "Disruptor", "Free Spirit")
+rownames(cor_matrix_df) <- c("Philanthropist", "Socializer", "Achiever", "Player", "Disruptor", "Free Spirit")
+colnames(cor_matrix_df) <- c("Philanthropist", "Socializer", "Achiever", "Player", "Disruptor", "Free Spirit")
 
 # Display the correlation matrix as a nicely formatted RMarkdown table
 cor_matrix_df %>%
@@ -1441,61 +1639,109 @@ cor_matrix_df %>%
 
 ```
 
+#### Appendix A17. Latent correlations among Hexad determinants
 
-
-
-####  Appendix A17. Latent correlations among Hexad determinants
 ```{r}
+# ------------------------------------------------------------
+# Appendix A17: Latent correlations among Hexad determinants
+# Corrected version using standardizedSolution()
+# ------------------------------------------------------------
 
-if (!exists("fit") || !inherits(fit, "lavaan")) {
-  library(lavaan)
-  if (!exists("cfa_model")) {
-    cfa_model <- '
-      Achiever       =~ A2 + A4
-      Disruptor      =~ D3 + D4
-      FreeSpirit     =~ F1 + F3
-      Philanthropist =~ P1 + P4
-      Player         =~ R2 + R4
-      Socializer     =~ S2 + S4
-    '
-  }
-  fit <- cfa(cfa_model, data = hexad_data, std.lv = TRUE, estimator = "WLSMV")
-}
+library(lavaan)
+library(dplyr)
+library(knitr)
+library(kableExtra)
 
-lat_cor <- lavaan::lavInspect(fit, "cor.lv")
+# Use the final analytical dataset
+# Change this line only if your final dataset object has a different name
+analysis_data <- hexad_data
 
-# Order factors consistently for reporting
-desired_order <- c("Philanthropist","Socializer","FreeSpirit","Achiever","Player","Disruptor")
-ord <- intersect(desired_order, colnames(lat_cor))
-lat_cor <- lat_cor[ord, ord, drop = FALSE]
-
-
-pe <- lavaan::parameterEstimates(fit, standardized = TRUE, ci = TRUE)
-
-lat_ci <- subset(
-  pe,
-  op == "~~" & lhs != rhs &
-    lhs %in% ord & rhs %in% ord,
-  select = c(lhs, rhs, std.all, ci.lower, ci.upper)
+# Item columns
+item_cols <- c(
+  "A2", "A4",
+  "D3", "D4",
+  "F1", "F3",
+  "P1", "P4",
+  "R2", "R4",
+  "S2", "S4"
 )
 
-# Rename columns for clarity
-colnames(lat_ci) <- c("Factor 1", "Factor 2", "Latent r", "95% CI Lower", "95% CI Upper")
+# CFA model
+cfa_model <- '
+  Achiever       =~ A2 + A4
+  Disruptor      =~ D3 + D4
+  FreeSpirit     =~ F1 + F3
+  Philanthropist =~ P1 + P4
+  Player         =~ R2 + R4
+  Socializer     =~ S2 + S4
+'
 
-# Sort alphabetically
-lat_ci <- lat_ci[order(lat_ci$`Factor 1`, lat_ci$`Factor 2`), ]
+# Always refit a fresh model for this table.
+# Do not reuse an existing object called "fit".
+fit_latcor <- lavaan::cfa(
+  cfa_model,
+  data = analysis_data,
+  std.lv = TRUE,
+  estimator = "WLSMV",
+  ordered = item_cols
+)
 
+# Desired reporting order
+desired_order <- c(
+  "Philanthropist",
+  "Socializer",
+  "FreeSpirit",
+  "Achiever",
+  "Player",
+  "Disruptor"
+)
 
-kable(lat_ci, caption = " Latent correlations among Hexad determinants", digits = 3)
+# Extract standardized solution with standardized confidence intervals
+std_sol <- lavaan::standardizedSolution(
+  fit_latcor,
+  ci = TRUE
+)
 
+# Keep only latent-factor correlations
+lat_ci <- std_sol %>%
+  filter(
+    op == "~~",
+    lhs != rhs,
+    lhs %in% desired_order,
+    rhs %in% desired_order
+  ) %>%
+  mutate(
+    lhs_order = match(lhs, desired_order),
+    rhs_order = match(rhs, desired_order)
+  ) %>%
+  arrange(lhs_order, rhs_order) %>%
+  transmute(
+    `Factor 1` = lhs,
+    `Factor 2` = rhs,
+    `Latent r` = est.std,
+    `95% CI Lower` = ci.lower,
+    `95% CI Upper` = ci.upper
+  )
 
+# Print table
+lat_ci %>%
+  kable(
+    caption = "Latent correlations among Hexad determinants",
+    digits = 3,
+    format = "markdown"
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed", "responsive")
+  )
 ```
 
-## 4.8. Criterion-related and group-level analyses
+## 4.5. External Relations and Group Analyses
 
 ### Game frequency-related patterns in Hexad-12 scores.
 
 #### Appendix A18. Correlations between Hexad determinants and gaming frequency
+
 ```{r}
 
 
@@ -1550,6 +1796,7 @@ kable(results_df,
 ```
 
 #### Appendix A19. Kruskal–Wallis test for Hexad determinants by gaming frequency
+
 ```{r}
 library(dplyr)
 library(tidyr)
@@ -1609,52 +1856,90 @@ n_by_group <- hexad_grouped %>%
   arrange(match(FreqGroup, c("1--2 days", "3--4 days", "5--7 days")))
 
 
-
-
+# Kruskal-Wallis tests, Bonferroni-adjusted p-values,
+# and epsilon-squared effect sizes
 kw_results <- hexad_grouped %>%
-  # Reshape to long format
   pivot_longer(
-    cols      = all_of(present_hexad_cols),
-    names_to  = "Determinant",
+    cols = all_of(present_hexad_cols),
+    names_to = "Determinant",
     values_to = "Score"
   ) %>%
+  filter(!is.na(Score)) %>%
   group_by(Determinant) %>%
   summarise(
-    n_total   = n(),
-    n_groups  = n_distinct(FreqGroup),
-    # Run the test
-    test_res  = list(kruskal.test(Score ~ FreqGroup)),
-    .groups   = "drop"
+    n_total = n(),
+    n_groups = n_distinct(FreqGroup),
+    test_res = list(kruskal.test(Score ~ FreqGroup)),
+    .groups = "drop"
   ) %>%
-  # Extract statistics
   mutate(
-    statistic = map_dbl(test_res, "statistic"),
-    df        = map_dbl(test_res, "parameter"),
-    p_value   = map_dbl(test_res, "p.value")
+    statistic = map_dbl(test_res, ~ unname(.x$statistic)),
+    df = map_dbl(test_res, ~ unname(.x$parameter)),
+    p_value = map_dbl(test_res, ~ .x$p.value),
+
+    # Bonferroni correction across the six Hexad comparisons
+    p_adj_bonferroni = p.adjust(
+      p_value,
+      method = "bonferroni"
+    ),
+
+    # Kruskal-Wallis epsilon-squared:
+    # epsilon^2 = (H - k + 1) / (n - k)
+    epsilon_sq = (
+      statistic - n_groups + 1
+    ) / (
+      n_total - n_groups
+    ),
+
+    # Set negative estimates to zero
+    epsilon_sq = pmax(0, epsilon_sq)
   ) %>%
-  # Apply Benjamini-Hochberg correction
-  mutate(
-    p_adj_BH  = p.adjust(p_value, method = "BH")
+  dplyr::select(
+    Determinant,
+    n_total,
+    statistic,
+    df,
+    p_value,
+    p_adj_bonferroni,
+    epsilon_sq
   ) %>%
-  # FIX: Use dplyr::select to avoid conflicts
-  dplyr::select(-test_res) %>%
   arrange(Determinant)
 
-
-
+# Format values for presentation
 kw_formatted <- kw_results %>%
   mutate(
     statistic = round(statistic, 2),
-    p_value   = round(p_value, 3),
-    p_adj_BH  = round(p_adj_BH, 3)
+    df = as.integer(df),
+    p_value = round(p_value, 3),
+    p_adj_bonferroni = round(p_adj_bonferroni, 3),
+    epsilon_sq = round(epsilon_sq, 3)
   )
 
-
-kable(kw_formatted[,-7], caption = "Kruskal–Wallis test for Hexad determinants by gaming frequency")
+# Updated Appendix A19 table
+kable(
+  kw_formatted,
+  caption = paste(
+    "Kruskal--Wallis tests, Bonferroni-adjusted p-values,",
+    "and epsilon-squared effect sizes for Hexad determinants",
+    "by gaming frequency"
+  ),
+  col.names = c(
+    "Determinant",
+    "n",
+    "Kruskal--Wallis",
+    "Degrees of Freedom",
+    "p-value",
+    "Adj. p-value",
+    "Epsilon-squared"
+  ),
+  align = c("l", "r", "r", "r", "r", "r", "r")
+)
 ```
 
 
-#### Multigroup Confirmatory factor Analysis 
+
+#### Multigroup confirmatory factor analysis
+
 ```{r}
 
 data_cfa <- merged_hexad
@@ -1746,14 +2031,15 @@ fit_table
 
 ```
 
-
-### Gender-related patterns in Hexad-12 scores. 
+### Gender-related patterns in Hexad-12 scores.
 
 #### Appendix A20. Kruskal–Wallis test for Hexad determinants by Gender
-```{r  b3}
 
+
+```{r}
 
 library(dplyr)
+library(knitr)
 
 hexad_vars <- c(
   "philanthropist",
@@ -1764,64 +2050,144 @@ hexad_vars <- c(
   "disruptor"
 )
 
-# 2. Keep rows with non-missing Gender
-data_gender <- merged_hexad[!is.na(merged_hexad$Gender), ]
+# Keep rows with non-missing gender
+data_gender <- merged_hexad %>%
+  filter(!is.na(Gender))
 
-# Check size
-dim(data_gender)
-
-# 3. Run Kruskal–Wallis for each determinant
+# Run Kruskal-Wallis tests for each determinant
 results_list <- lapply(hexad_vars, function(var_name) {
-  
-  # Build temporary dataset
+
+  # Create a temporary data frame and remove missing scores
   df_sub <- data.frame(
     gender = data_gender$Gender,
-    score  = data_gender[[var_name]]
-  )
-  
-  # Remove missing scores
-  df_sub <- df_sub[!is.na(df_sub$score), ]
-  
-  # Number of gender groups with data
-  n_groups <- length(unique(df_sub$gender))
-  
-  # If fewer than 2 groups, skip test
-  if (n_groups < 2 || nrow(df_sub) == 0) {
-    return(data.frame(
-      Determinant = var_name,
-      n          = nrow(df_sub),
-      n_groups   = n_groups,
-      statistic  = NA_real_,
-      df         = NA_real_,
-      p_value    = NA_real_
-    ))
+    score = suppressWarnings(
+      as.numeric(as.character(data_gender[[var_name]]))
+    )
+  ) %>%
+    filter(
+      !is.na(gender),
+      !is.na(score)
+    )
+
+  # Valid sample size and number of gender groups
+  n_total <- nrow(df_sub)
+  n_groups <- n_distinct(df_sub$gender)
+
+  # Return missing results if the test cannot be conducted
+  if (n_groups < 2 || n_total <= n_groups) {
+    return(
+      data.frame(
+        Determinant = var_name,
+        n = n_total,
+        statistic = NA_real_,
+        df = NA_real_,
+        p_value = NA_real_,
+        epsilon_sq = NA_real_
+      )
+    )
   }
-  
-  # Kruskal–Wallis test
+
+  # Run the Kruskal-Wallis test
   kt <- kruskal.test(score ~ gender, data = df_sub)
-  
+
+  # Extract the Kruskal-Wallis H statistic
+  H <- unname(kt$statistic)
+
+  # Kruskal-Wallis epsilon-squared:
+  # epsilon^2 = (H - k + 1) / (n - k)
+  epsilon_sq <- (
+    H - n_groups + 1
+  ) / (
+    n_total - n_groups
+  )
+
+  # Negative estimates may occur because of sampling variation
+  epsilon_sq <- max(0, epsilon_sq)
+
+  # Return unrounded results
   data.frame(
     Determinant = var_name,
-    n           = nrow(df_sub),
-    n_groups    = n_groups,
-    statistic   = round(unname(kt$statistic),2),
-    df          = unname(kt$parameter),
-    p_value     = round(kt$p.value, 3)
+    n = n_total,
+    statistic = H,
+    df = unname(kt$parameter),
+    p_value = kt$p.value,
+    epsilon_sq = epsilon_sq
   )
 })
 
-# 4. Combine, clean, adjust p-values
-kw_results <- do.call(rbind, results_list)
-kw_results$p_adj_BH <- p.adjust(kw_results$p_value, method = "BH")
+# Combine results
+kw_results <- bind_rows(results_list) %>%
 
-kw_results_tbl <- as_tibble(kw_results[, -7])
+  # Apply Bonferroni correction across the six determinant tests
+  mutate(
+    p_adj_bonferroni = p.adjust(
+      p_value,
+      method = "bonferroni"
+    )
+  ) %>%
 
+  # Arrange determinants in the desired table order
+  mutate(
+    Determinant = factor(
+      Determinant,
+      levels = hexad_vars,
+      labels = c(
+        "Philanthropist",
+        "Socializer",
+        "Free Spirit",
+        "Achiever",
+        "Player",
+        "Disruptor"
+      )
+    )
+  ) %>%
+  arrange(Determinant) %>%
 
-kable(kw_results_tbl, caption = "Kruskal–Wallis test for Hexad determinants by Gender")
+  # Select columns in the same order as Table A19
+  dplyr::select(
+    Determinant,
+    n,
+    statistic,
+    df,
+    p_value,
+    p_adj_bonferroni,
+    epsilon_sq
+  )
 
+# Format values only after calculating adjusted p-values
+kw_formatted <- kw_results %>%
+  mutate(
+    statistic = round(statistic, 2),
+    df = as.integer(df),
+    p_value = round(p_value, 3),
+    p_adj_bonferroni = round(p_adj_bonferroni, 3),
+    epsilon_sq = round(epsilon_sq, 3)
+  )
+
+# Updated Appendix A20 table
+kable(
+  kw_formatted,
+  caption = paste(
+    "Kruskal-Wallis tests, Bonferroni-adjusted p-values,",
+    "and epsilon-squared effect sizes for Hexad determinants",
+    "by gender"
+  ),
+  col.names = c(
+    "Determinant",
+    "n",
+    "Kruskal-Wallis",
+    "d.f.",
+    "p-value",
+    "adj. p-value",
+    "Epsilon-squared"
+  ),
+  align = c("l", "r", "r", "r", "r", "r", "r")
+)
 
 ```
-#### Multigroup Confirmatory factor Analysis 
+
+#### Multigroup Confirmatory factor Analysis
+
 ```{r  b4}
 
 data_cfa <- merged_hexad   
@@ -1924,10 +2290,10 @@ fit_table
 
 ```
 
-
-### Age-related patterns in Hexad-12 scores. 
+### Age-related patterns in Hexad-12 scores.
 
 #### Appendix A21. Correlations between Hexad determinants and Age
+
 ```{r  b5}
 
 
@@ -1958,22 +2324,21 @@ age_kendall <- hexad_dets %>%
     y <- merged_hexad_age[[det]]
     idx <- !is.na(x) & !is.na(y)
 
-    kt <- cor.test(
-      x[idx], y[idx],
-      method = "kendall", exact = FALSE
-    )
+    kt <- cor.test(x[idx], y[idx], method = "kendall", exact = FALSE)
 
     tibble(
       Determinant = det,
-      n          = sum(idx),
-      tau        = round(unname(kt$estimate), 3),
-      p_value    = round(kt$p.value, 3)
+      n = sum(idx),
+      tau = unname(kt$estimate),
+      p_value = kt$p.value
     )
   }) %>%
   mutate(
-    p_adj_BH = round(p.adjust(p_value, method = "BH"), 5)
+    p_adj_bonferroni = p.adjust(p_value, method = "bonferroni"),
+    tau = round(tau, 3),
+    p_value = round(p_value, 3),
+    p_adj_bonferroni = round(p_adj_bonferroni, 3)
   )
-
 
 
 kable(age_kendall[,-5], caption = "Correlations between Hexad determinants and Age")
@@ -1981,74 +2346,462 @@ kable(age_kendall[,-5], caption = "Correlations between Hexad determinants and A
 
 ```
 
-
 #### Appendix A22. Kruskal–Wallis test for Hexad determinants by Age Group
-```{r}
 
+```{r}
+library(dplyr)
+library(purrr)
+library(tibble)
+library(knitr)
+
+# Run Kruskal-Wallis tests for each Hexad determinant
 kw_results <- hexad_dets %>%
   map_df(function(det) {
+
+    # Retain observations with a valid age group and determinant score
     df_sub <- merged_hexad_age %>%
-      filter(!is.na(AgeGroup), !is.na(.data[[det]]))
+      transmute(
+        AgeGroup = AgeGroup,
+        Score = suppressWarnings(
+          as.numeric(as.character(.data[[det]]))
+        )
+      ) %>%
+      filter(
+        !is.na(AgeGroup),
+        !is.na(Score)
+      )
 
-    kw <- kruskal.test(df_sub[[det]] ~ df_sub$AgeGroup)
+    # Determine the valid sample size and number of age groups
+    n_total <- nrow(df_sub)
+    n_groups <- n_distinct(df_sub$AgeGroup)
 
+    # Return missing results if the test cannot be conducted
+    if (n_groups < 2 || n_total <= n_groups) {
+      return(
+        tibble(
+          Determinant = det,
+          n = n_total,
+          statistic = NA_real_,
+          df = NA_real_,
+          p_value = NA_real_,
+          epsilon_sq = NA_real_
+        )
+      )
+    }
+
+    # Run the Kruskal-Wallis test
+    kw <- kruskal.test(
+      Score ~ AgeGroup,
+      data = df_sub
+    )
+
+    # Extract the Kruskal-Wallis H statistic
+    H <- unname(kw$statistic)
+
+    # Kruskal-Wallis epsilon-squared:
+    # epsilon^2 = (H - k + 1) / (n - k)
+    epsilon_sq <- (
+      H - n_groups + 1
+    ) / (
+      n_total - n_groups
+    )
+
+    # Negative estimates may occur because of sampling variation
+    epsilon_sq <- max(0, epsilon_sq)
+
+    # Return unrounded results
     tibble(
       Determinant = det,
-      n          = nrow(df_sub),
-      n_groups   = n_distinct(df_sub$AgeGroup),
-      statistic  = round(as.numeric(kw$statistic), 2),
-      df         = as.numeric(kw$parameter),
-      p_value    = round(kw$p.value, 3)
+      n = n_total,
+      statistic = H,
+      df = unname(kw$parameter),
+      p_value = kw$p.value,
+      epsilon_sq = epsilon_sq
     )
   }) %>%
+
+  # Apply the Bonferroni correction across the determinant tests
   mutate(
-    p_adj_BH = round(p.adjust(p_value, method = "BH"), 5)
+    p_adj_bonferroni = p.adjust(
+      p_value,
+      method = "bonferroni"
+    )
+  ) %>%
+
+  # Arrange and select columns to match Tables A19 and A20
+  dplyr::select(
+    Determinant,
+    n,
+    statistic,
+    df,
+    p_value,
+    p_adj_bonferroni,
+    epsilon_sq
   )
 
+# Format values only after calculating adjusted p-values
+kw_formatted <- kw_results %>%
+  mutate(
+    statistic = round(statistic, 2),
+    df = as.integer(df),
+    p_value = round(p_value, 3),
+    p_adj_bonferroni = round(p_adj_bonferroni, 3),
+    epsilon_sq = round(epsilon_sq, 3)
+  )
 
-
-kable(kw_results[,-7], caption = "Kruskal–Wallis test for Hexad determinants by Age Group")
+# Updated Appendix A22 table
+kable(
+  kw_formatted,
+  caption = paste(
+    "Kruskal-Wallis tests, Bonferroni-adjusted p-values,",
+    "and epsilon-squared effect sizes for Hexad determinants",
+    "by age group"
+  ),
+  col.names = c(
+    "Determinant",
+    "n",
+    "Kruskal-Wallis",
+    "d.f.",
+    "p-value",
+    "Adj. p-value",
+    "Epsilon-squared"
+  ),
+  align = c("l", "r", "r", "r", "r", "r", "r")
+)
 
 ```
 
-#### Dunn post-hoc tests
+
+####  Dunn post-hoc tests with effect sizes
 ```{r}
+library(dplyr)
+library(purrr)
+library(tibble)
+library(stringr)
+library(FSA)
+library(knitr)
 
-sig_dets <- kw_results %>%
-  filter(p_adj_BH < 0.05) %>%
-  pull(Determinant)
+# Hexad determinant variables
+hexad_dets <- c(
+  "philanthropist",
+  "socializer",
+  "freeSpirit",
+  "achiever",
+  "player",
+  "disruptor"
+)
 
-sig_dets    # determinants that need a Dunn post-hoc test
+# ============================================================
+# 1. Omnibus Kruskal-Wallis tests
+# ============================================================
 
-dunn_results <- sig_dets %>%
-  map_df(function(det) {
+kw_results <- purrr::map_dfr(
+  hexad_dets,
+  function(det) {
+
+    # Retain complete observations and convert scores to numeric
     df_sub <- merged_hexad_age %>%
-      filter(!is.na(AgeGroup), !is.na(.data[[det]]))
+      dplyr::transmute(
+        AgeGroup = as.character(AgeGroup),
+        Score = suppressWarnings(
+          as.numeric(as.character(.data[[det]]))
+        )
+      ) %>%
+      dplyr::filter(
+        !is.na(AgeGroup),
+        AgeGroup != "",
+        !is.na(Score)
+      )
 
-    dt <- dunnTest(
-      x      = df_sub[[det]],
-      g      = df_sub$AgeGroup,
-      method = "bh"
+    # Sample size and number of groups
+    n_total <- nrow(df_sub)
+    n_groups <- dplyr::n_distinct(df_sub$AgeGroup)
+
+    # Return missing values if the test cannot be conducted
+    if (n_groups < 2 || n_total <= n_groups) {
+      return(
+        tibble::tibble(
+          Determinant = det,
+          n = n_total,
+          n_groups = n_groups,
+          statistic = NA_real_,
+          df = NA_real_,
+          p_value = NA_real_,
+          epsilon_sq = NA_real_
+        )
+      )
+    }
+
+    # Kruskal-Wallis test
+    kw <- stats::kruskal.test(
+      Score ~ AgeGroup,
+      data = df_sub
     )
 
-    as_tibble(dt$res) %>%
-      mutate(
-        Determinant = det,
-        Z        = round(Z, 5),
-        P.unadj  = round(P.unadj, 5),
-        P.adj    = round(P.adj, 5),
-        .before = 1
+    H <- unname(kw$statistic)
+
+    # Kruskal-Wallis epsilon-squared
+    epsilon_sq <- (
+      H - n_groups + 1
+    ) / (
+      n_total - n_groups
+    )
+
+    # Negative estimates may occur because of sampling variation
+    epsilon_sq <- max(0, epsilon_sq)
+
+    tibble::tibble(
+      Determinant = det,
+      n = n_total,
+      n_groups = n_groups,
+      statistic = H,
+      df = unname(kw$parameter),
+      p_value = kw$p.value,
+      epsilon_sq = epsilon_sq
+    )
+  }
+) %>%
+  dplyr::mutate(
+    # Bonferroni adjustment across the six omnibus tests
+    p_adj_bonferroni = stats::p.adjust(
+      p_value,
+      method = "bonferroni"
+    )
+  ) %>%
+  dplyr::select(
+    Determinant,
+    n,
+    n_groups,
+    statistic,
+    df,
+    p_value,
+    p_adj_bonferroni,
+    epsilon_sq
+  )
+
+# Display omnibus results
+kw_formatted <- kw_results %>%
+  dplyr::mutate(
+    statistic = round(statistic, 2),
+    df = as.integer(df),
+    p_value = round(p_value, 5),
+    p_adj_bonferroni = round(p_adj_bonferroni, 5),
+    epsilon_sq = round(epsilon_sq, 3)
+  )
+
+knitr::kable(
+  kw_formatted,
+  caption = paste(
+    "Kruskal-Wallis tests, Bonferroni-adjusted p-values,",
+    "and epsilon-squared effect sizes by age group"
+  ),
+  col.names = c(
+    "Determinant",
+    "n",
+    "Number of groups",
+    "Kruskal-Wallis H",
+    "Degrees of freedom",
+    "Unadjusted p-value",
+    "Bonferroni-adjusted p-value",
+    "Epsilon-squared"
+  )
+)
+
+# ============================================================
+# 2. Identify significant omnibus tests
+# ============================================================
+
+sig_dets <- kw_results %>%
+  dplyr::filter(
+    !is.na(p_adj_bonferroni),
+    p_adj_bonferroni < 0.05
+  ) %>%
+  dplyr::pull(Determinant) %>%
+  as.character()
+
+print(sig_dets)
+
+# ============================================================
+# 3. Dunn post-hoc tests with Bonferroni correction
+# ============================================================
+
+if (length(sig_dets) > 0) {
+
+  dunn_results <- purrr::map_dfr(
+    sig_dets,
+    function(det) {
+
+      # Retain complete observations
+      df_sub <- merged_hexad_age %>%
+        dplyr::transmute(
+          AgeGroup = as.character(AgeGroup),
+          Score = suppressWarnings(
+            as.numeric(as.character(.data[[det]]))
+          )
+        ) %>%
+        dplyr::filter(
+          !is.na(AgeGroup),
+          AgeGroup != "",
+          !is.na(Score)
+        )
+
+      # Dunn test with Bonferroni-adjusted p-values
+      dt <- FSA::dunnTest(
+        x = df_sub$Score,
+        g = df_sub$AgeGroup,
+        method = "bonferroni"
       )
-  })
 
-dunn_results
+      # Sample size for each age group
+      group_sizes <- df_sub %>%
+        dplyr::count(
+          AgeGroup,
+          name = "group_n"
+        )
 
+      # Extract and process Dunn-test results
+      dunn_tbl <- tibble::as_tibble(dt$res) %>%
+        dplyr::mutate(
+          Determinant = det,
 
+          Group1 = stringr::str_trim(
+            stringr::str_split_fixed(
+              Comparison,
+              " - ",
+              2
+            )[, 1]
+          ),
 
+          Group2 = stringr::str_trim(
+            stringr::str_split_fixed(
+              Comparison,
+              " - ",
+              2
+            )[, 2]
+          )
+        ) %>%
+
+        # Add sample size for Group 1
+        dplyr::left_join(
+          group_sizes,
+          by = c("Group1" = "AgeGroup")
+        ) %>%
+        dplyr::rename(
+          n_Group1 = group_n
+        ) %>%
+
+        # Add sample size for Group 2
+        dplyr::left_join(
+          group_sizes,
+          by = c("Group2" = "AgeGroup")
+        ) %>%
+        dplyr::rename(
+          n_Group2 = group_n
+        ) %>%
+
+        # Calculate pairwise effect-size magnitude
+        dplyr::mutate(
+          n_pair = n_Group1 + n_Group2,
+
+          effect_r = abs(Z) / sqrt(n_pair),
+
+          significant = P.adj < 0.05
+        ) %>%
+
+        # Explicitly use dplyr::select to avoid package conflicts
+        dplyr::select(
+          Determinant,
+          Comparison,
+          Group1,
+          Group2,
+          n_Group1,
+          n_Group2,
+          n_pair,
+          Z,
+          P.unadj,
+          P.adj,
+          effect_r,
+          significant
+        )
+
+      return(dunn_tbl)
+    }
+  )
+
+  # Format only after all calculations are completed
+  dunn_formatted <- dunn_results %>%
+    dplyr::mutate(
+      Z = round(Z, 3),
+      P.unadj = round(P.unadj, 5),
+      P.adj = round(P.adj, 5),
+      effect_r = round(effect_r, 3)
+    )
+
+  # Table containing all pairwise comparisons
+  knitr::kable(
+    dunn_formatted,
+    caption = paste(
+      "Dunn post-hoc comparisons with Bonferroni-adjusted p-values",
+      "and pairwise effect sizes by age group"
+    ),
+    col.names = c(
+      "Determinant",
+      "Comparison",
+      "Group 1",
+      "Group 2",
+      "n Group 1",
+      "n Group 2",
+      "Pairwise n",
+      "Z",
+      "Unadjusted p-value",
+      "Bonferroni-adjusted p-value",
+      "Effect size r",
+      "Significant"
+    )
+  )
+
+  # Table containing only significant pairwise comparisons
+  dunn_significant <- dunn_formatted %>%
+    dplyr::filter(significant)
+
+  knitr::kable(
+    dunn_significant,
+    caption = paste(
+      "Significant Dunn post-hoc comparisons after",
+      "Bonferroni correction"
+    ),
+    col.names = c(
+      "Determinant",
+      "Comparison",
+      "Group 1",
+      "Group 2",
+      "n Group 1",
+      "n Group 2",
+      "Pairwise n",
+      "Z",
+      "Unadjusted p-value",
+      "Bonferroni-adjusted p-value",
+      "Effect size r",
+      "Significant"
+    )
+  )
+
+} else {
+
+  message(
+    "No determinants remained significant after the ",
+    "Bonferroni correction; Dunn post-hoc tests were not conducted."
+  )
+}
 ```
 
 
-#### Multigroup Confirmatory factor Analysis 
+
+
+
+
+#### Multigroup Confirmatory factor Analysis
+
 ```{r  b6}
 
 
@@ -2200,44 +2953,174 @@ mi_age$fit_table     # CFI / RMSEA / SRMR by model
 
 ```
 
-## Country-related patterns in Hexad-12 scores. 
+## Country-related patterns in Hexad-12 scores.
 
 #### Appendix A23. Kruskal–Wallis test for Hexad determinants by top 10 countries
+
 ```{r}
+library(dplyr)
+library(purrr)
+library(tibble)
+library(knitr)
 
 # Hexad determinants
-hexad_dets <- c("philanthropist", "socializer", "freeSpirit",
-                "achiever", "player", "disruptor")
+hexad_dets <- c(
+  "philanthropist",
+  "socializer",
+  "freeSpirit",
+  "achiever",
+  "player",
+  "disruptor"
+)
 
-kw_country_results <- hexad_dets %>%
-  map_df(function(det) {
+# ============================================================
+# Kruskal-Wallis tests by country
+# ============================================================
+
+kw_country_results <- purrr::map_dfr(
+  hexad_dets,
+  function(det) {
+
+    # Retain observations with a valid country and determinant score
     df_sub <- hexad_top10 %>%
-      filter(!is.na(Country), !is.na(.data[[det]]))
+      dplyr::transmute(
+        Country = trimws(as.character(Country)),
+        Score = suppressWarnings(
+          as.numeric(as.character(.data[[det]]))
+        )
+      ) %>%
+      dplyr::filter(
+        !is.na(Country),
+        Country != "",
+        !is.na(Score)
+      )
 
-    kw <- kruskal.test(df_sub[[det]] ~ df_sub$Country)
+    # Valid sample size and number of countries
+    n_total <- nrow(df_sub)
+    n_groups <- dplyr::n_distinct(df_sub$Country)
 
-    tibble(
-      Determinant = det,
-      n           = nrow(df_sub),
-      n_groups    = n_distinct(df_sub$Country),
-      statistic   = round(as.numeric(kw$statistic), 2),
-      df          = as.numeric(kw$parameter),
-      p_value     = kw$p.value
+    # Return missing results if the test cannot be conducted
+    if (n_groups < 2 || n_total <= n_groups) {
+      return(
+        tibble::tibble(
+          Determinant = det,
+          n = n_total,
+          statistic = NA_real_,
+          df = NA_real_,
+          p_value = NA_real_,
+          epsilon_sq = NA_real_
+        )
+      )
+    }
+
+    # Run the Kruskal-Wallis test
+    kw <- stats::kruskal.test(
+      Score ~ Country,
+      data = df_sub
     )
-  }) %>%
-  mutate(
-    p_value   = round(p_value, 3),
-    p_adj_BH  = round(p.adjust(p_value, method = "BH"), 5)
+
+    # Extract the Kruskal-Wallis H statistic
+    H <- unname(kw$statistic)
+
+    # Kruskal-Wallis epsilon-squared:
+    # epsilon^2 = (H - k + 1) / (n - k)
+    epsilon_sq <- (
+      H - n_groups + 1
+    ) / (
+      n_total - n_groups
+    )
+
+    # Negative estimates can occur because of sampling variation
+    epsilon_sq <- max(0, epsilon_sq)
+
+    # Return unrounded results
+    tibble::tibble(
+      Determinant = det,
+      n = n_total,
+      statistic = H,
+      df = unname(kw$parameter),
+      p_value = kw$p.value,
+      epsilon_sq = epsilon_sq
+    )
+  }
+) %>%
+
+  # Apply Bonferroni correction across the six determinant tests
+  dplyr::mutate(
+    p_adj_bonferroni = stats::p.adjust(
+      p_value,
+      method = "bonferroni"
+    )
+  ) %>%
+
+  # Give determinants publication-ready labels
+  dplyr::mutate(
+    Determinant = factor(
+      Determinant,
+      levels = hexad_dets,
+      labels = c(
+        "Philanthropist",
+        "Socializer",
+        "Free Spirit",
+        "Achiever",
+        "Player",
+        "Disruptor"
+      )
+    )
+  ) %>%
+
+  # Match the column order used in the previous tables
+  dplyr::select(
+    Determinant,
+    n,
+    statistic,
+    df,
+    p_value,
+    p_adj_bonferroni,
+    epsilon_sq
   )
 
+# ============================================================
+# Format values for presentation
+# ============================================================
 
+kw_country_formatted <- kw_country_results %>%
+  dplyr::mutate(
+    statistic = round(statistic, 2),
+    df = as.integer(df),
+    p_value = round(p_value, 3),
+    p_adj_bonferroni = round(p_adj_bonferroni, 3),
+    epsilon_sq = round(epsilon_sq, 3)
+  )
 
-kable(kw_country_results[,-7], caption = "Kruskal–Wallis test for Hexad determinants by Age Group")
+# ============================================================
+# Updated Appendix A23 table
+# ============================================================
 
+knitr::kable(
+  kw_country_formatted,
+  caption = paste(
+    "Kruskal-Wallis tests, Bonferroni-adjusted p-values,",
+    "and epsilon-squared effect sizes for Hexad determinants",
+    "across the top 10 countries"
+  ),
+  col.names = c(
+    "Determinant",
+    "n",
+    "Kruskal-Wallis H",
+    "Degrees of Freedom",
+    "p-value",
+    "Adjusted p-value",
+    "Epsilon-squared"
+  ),
+  align = c("l", "r", "r", "r", "r", "r", "r")
+)
 ```
 
 
-#### Multigroup Confirmatory factor Analysis 
+
+#### Multigroup Confirmatory factor Analysis
+
 ```{r}
 
 
